@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bn" class="h-full bg-slate-900">
 <head>
     <meta charset="UTF-8">
@@ -1512,7 +1512,7 @@
         }
 
         // ============================================
-        // ⭐ CLOUDINARY UPLOAD FUNCTIONS (NEW)
+        // ⭐ CLOUDINARY UPLOAD FUNCTIONS (UPDATED)
         // ============================================
         async function uploadToCloudinary(base64Data, filename, resourceType = 'auto') {
             try {
@@ -1542,6 +1542,58 @@
 
                 const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${endpoint}`;
                 console.log('🌐 POST:', url);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('❌ Cloudinary error:', errorData);
+                    throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ Upload success:', result.secure_url);
+                return result.secure_url;
+
+            } catch (error) {
+                console.error('❌ Cloudinary upload FAILED:', error);
+                throw error;
+            }
+        }
+
+        // ⭐ NEW: Student-wise folder upload with subfolder support
+        async function uploadToCloudinaryWithStudentFolder(base64Data, filename, resourceType = 'auto', studentId = null) {
+            try {
+                console.log('📤 Uploading to Cloudinary:', filename, '| Type:', resourceType, '| Student:', studentId);
+
+                // Convert base64 → Blob
+                const blob = await (await fetch(base64Data)).blob();
+                console.log('📦 Blob size:', Math.round(blob.size / 1024), 'KB');
+
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+
+                // ⭐ Student-wise folder: mx-school/DS-XXX/
+                const studentFolder = studentId ? `${CLOUDINARY_CONFIG.folder}/${studentId}` : CLOUDINARY_CONFIG.folder;
+                formData.append('folder', studentFolder);
+
+                // Sanitize filename
+                const safeName = String(filename || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
+                formData.append('public_id', `${Date.now()}_${safeName}`);
+
+                // Auto-detect resource type
+                let endpoint = 'auto/upload';
+                if (resourceType === 'image') endpoint = 'image/upload';
+                else if (resourceType === 'video') endpoint = 'video/upload';
+                else if (resourceType === 'raw') endpoint = 'raw/upload';
+
+                const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${endpoint}`;
+                console.log('🌐 POST:', url, '| Folder:', studentFolder);
 
                 const response = await fetch(url, {
                     method: 'POST',
@@ -2052,9 +2104,10 @@
 
             for (const att of tempAttachments) {
                 try {
+                    // ⭐ Student-wise folder upload
                     let fileUrl = att.dataUrl;
                     try {
-                        fileUrl = await uploadToCloudinary(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name));
+                        fileUrl = await uploadToCloudinaryWithStudentFolder(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name), pendingAttachmentStudentId);
                     } catch(err) {
                         console.warn('Cloudinary upload failed, using base64:', err);
                     }
@@ -2466,7 +2519,7 @@
 
             try {
                 await deleteStudentFromFirebase(studentId);
-                showToast("শিক্ষার্থী মুছে ফেলা হয়েছে", `${deletedName} (${studentId})-এর সকল তথ্য সফলভাবে মুছে ফেলা হয়েছে।`, "success");
+                showToast("শিক্ষার্থী মুছে ফেলা হয়েছে", `${deletedName} (${studentId})-এর সকল তথ্য সফলভাবে মুছে ফেলা হয়েছে। Cloudinary থেকে ম্যানুয়ালি ফোল্ডারটি ডিলিট করুন: ${CLOUDINARY_CONFIG.folder}/${studentId}/`, "success");
             } catch(err) {
                 showToast("ত্রুটি", "Firebase delete ব্যর্থ: " + err.message, "error");
             }
@@ -2628,12 +2681,12 @@
             const eduVal = document.querySelector('input[name="edu"]:checked')?.value || "SSC";
             const abroadVal = document.querySelector('input[name="abroad"]:checked')?.value || "না";
 
-            // Upload photo to Cloudinary
+            // ⭐ Upload photo to Cloudinary with student-wise folder
             let photoUrl = tempAdmissionPhoto;
             if (tempAdmissionPhoto && !tempAdmissionPhoto.startsWith('http')) {
                 try {
                     showToast("আপলোড হচ্ছে", "ছবি Cloudinary-তে আপলোড করা হচ্ছে...", "info");
-                    photoUrl = await uploadToCloudinary(tempAdmissionPhoto, `${studentId}_admission.jpg`, 'image');
+                    photoUrl = await uploadToCloudinaryWithStudentFolder(tempAdmissionPhoto, `${studentId}_admission.jpg`, 'image', studentId);
                 } catch(err) {
                     console.warn('Admission photo upload failed:', err);
                     showToast("ছবি আপলোড ব্যর্থ", err.message, "warning");
@@ -2780,12 +2833,12 @@
                 });
             }
 
-            // Upload photo to Cloudinary
+            // ⭐ Upload photo to Cloudinary with student-wise folder
             let photoUrl = "";
             if (tempNewStudentPhoto) {
                 try {
                     showToast("আপলোড হচ্ছে", "ছবি Cloudinary-তে আপলোড হচ্ছে...", "info");
-                    photoUrl = await uploadToCloudinary(tempNewStudentPhoto, `${id}_photo.jpg`, 'image');
+                    photoUrl = await uploadToCloudinaryWithStudentFolder(tempNewStudentPhoto, `${id}_photo.jpg`, 'image', id);
                 } catch(err) {
                     console.warn('Photo upload failed, using base64:', err);
                     photoUrl = tempNewStudentPhoto;
@@ -2793,12 +2846,12 @@
                 }
             }
 
-            // Upload attachments to Cloudinary
+            // ⭐ Upload attachments to Cloudinary with student-wise folder
             const attachments = [];
             for (let i = 0; i < tempAttachments.length; i++) {
                 const att = tempAttachments[i];
                 try {
-                    const url = await uploadToCloudinary(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name));
+                    const url = await uploadToCloudinaryWithStudentFolder(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name), id);
                     attachments.push({
                         name: att.name,
                         size: att.size,
@@ -3210,7 +3263,8 @@
 
             if (hasSignature) {
                 try {
-                    signatureUrl = await uploadToCloudinary(sigCanvas.toDataURL(), `${studentId}_signature.png`, 'image');
+                    // ⭐ Student-wise folder upload
+                    signatureUrl = await uploadToCloudinaryWithStudentFolder(sigCanvas.toDataURL(), `${studentId}_signature.png`, 'image', studentId);
                 } catch(err) {
                     console.warn('Signature upload failed, using base64');
                     signatureUrl = sigCanvas.toDataURL();
@@ -3218,7 +3272,8 @@
             }
             if (hasPhoto) {
                 try {
-                    photoUrl = await uploadToCloudinary(capturedPhotoData, `${studentId}_class_photo.jpg`, 'image');
+                    // ⭐ Student-wise folder upload
+                    photoUrl = await uploadToCloudinaryWithStudentFolder(capturedPhotoData, `${studentId}_class_photo.jpg`, 'image', studentId);
                 } catch(err) {
                     console.warn('Photo upload failed, using base64');
                     photoUrl = capturedPhotoData;
