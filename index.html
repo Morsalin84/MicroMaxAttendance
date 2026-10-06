@@ -1,0 +1,3396 @@
+<!DOCTYPE html>
+<html lang="bn" class="h-full bg-slate-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল - অফিসিয়াল ম্যানেজমেন্ট সিস্টেম</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        amber: { 400: '#fbbf24', 500: '#f59e0b', 600: '#d97706' },
+                        slate: { 850: '#172033', 900: '#0f172a', 950: '#020617' }
+                    },
+                    fontFamily: {
+                        sans: ['Hind Siliguri', 'Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                        sutonny: ['SutonnyMJ', 'Hind Siliguri', 'serif'],
+                        times: ['"Times New Roman"', 'Times', 'serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        @font-face {
+            font-family: 'SutonnyMJ';
+            src: local('SutonnyMJ'), local('Sutonny MJ'), local('SutonnyMJ Regular');
+            font-display: swap;
+        }
+
+        .signature-canvas { touch-action: none; background-color: #ffffff; cursor: crosshair; }
+        @page { size: A4 portrait; margin: 0; }
+        @media print {
+            body * { visibility: hidden !important; }
+            #printableAdmissionForm, #printableAdmissionForm * { visibility: visible !important; }
+            #printableAdmissionForm {
+                position: absolute !important; left: 0 !important; top: 0 !important;
+                width: 210mm !important; height: 297mm !important; margin: 0 !important;
+                padding: 15mm 20mm !important; background: white !important; color: black !important;
+                box-sizing: border-box !important;
+            }
+            .no-print { display: none !important; }
+        }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(245, 158, 11, 0.4); border-radius: 4px; }
+        
+        .pdf-paper {
+            background-color: #ffffff; color: #000000;
+            font-family: 'SutonnyMJ', 'Hind Siliguri', serif;
+            border: 2px solid #000000; width: 100%; max-width: 210mm;
+            min-height: 290mm; box-sizing: border-box; margin: 0 auto;
+        }
+        .pdf-bn { font-family: 'SutonnyMJ', 'Hind Siliguri', serif; }
+        .pdf-en { font-family: '"Times New Roman"', 'Times', serif; }
+        .money-mask { cursor: pointer; transition: all 0.2s; user-select: none; }
+        .money-mask:hover { color: #fbbf24; text-decoration: underline; }
+        .fee-locked { cursor: not-allowed !important; color: #64748b !important; text-decoration: none !important; }
+        .fee-locked:hover { color: #64748b !important; text-decoration: none !important; }
+        .student-avatar { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid #f59e0b; flex-shrink: 0; }
+        .otp-refresh-btn { transition: transform 0.3s ease; }
+        .otp-refresh-btn:hover { transform: rotate(180deg); }
+
+        #loadingOverlay {
+            position: fixed; inset: 0; z-index: 9999;
+            background: rgba(15, 23, 42, 0.95);
+            display: flex; align-items: center; justify-content: center;
+            flex-direction: column; gap: 1rem;
+            transition: opacity 0.4s ease;
+        }
+        #loadingOverlay.hidden-overlay { opacity: 0; pointer-events: none; }
+        .spinner {
+            width: 48px; height: 48px; border: 4px solid #f59e0b;
+            border-top-color: transparent; border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .sync-dot {
+            width: 8px; height: 8px; border-radius: 50%;
+            display: inline-block; margin-right: 6px;
+        }
+        .sync-online { background: #10b981; box-shadow: 0 0 8px #10b981; }
+        .sync-offline { background: #f43f5e; box-shadow: 0 0 8px #f43f5e; }
+        .sync-syncing { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 50% { opacity: 0.4; } }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-full flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
+
+    <div id="loadingOverlay">
+        <div class="spinner"></div>
+        <p class="text-slate-300 text-sm font-semibold">সার্ভারের সাথে সংযোগ স্থাপন করা হচ্ছে...</p>
+        <p id="loadingDetail" class="text-slate-500 text-xs mt-1">Firebase Database লোড হচ্ছে</p>
+    </div>
+
+    <header id="appHeader" class="bg-slate-850 border-b border-slate-800 sticky top-0 z-40 shadow-xl no-print hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3 space-x-reverse">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center text-xl font-black shadow-lg shadow-amber-500/20">
+                        <i class="fa-solid fa-car-side"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-base sm:text-lg font-bold leading-tight text-white flex items-center gap-2">
+                            মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল
+                            <span id="roleBadge" class="text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-mono font-normal">প্রশাসনিক প্যানেল</span>
+                        </h1>
+                        <p class="text-xs text-slate-400 flex items-center">
+                            <span id="syncStatus" class="sync-dot sync-syncing"></span>
+                            <span id="syncText">সার্ভারের সাথে সংযুক্ত হচ্ছে...</span>
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <nav class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm">
+                        <button id="navDashboardBtn" onclick="switchView('dashboard')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg transition bg-amber-500 text-slate-950 shadow-md">
+                            <i class="fa-solid fa-gauge-high mr-1"></i> ড্যাশবোর্ড
+                        </button>
+                        <button id="navAdmissionFormsBtn" onclick="switchView('admission_forms')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                            <i class="fa-solid fa-file-pdf mr-1 text-amber-400"></i> ভর্তি ফরম
+                        </button>
+                        <button id="navVerifyBtn" onclick="switchView('verify')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                            <i class="fa-solid fa-file-signature mr-1"></i> ক্লাস ভেরিফিকেশন
+                        </button>
+                        <button id="navLogsBtn" onclick="switchView('logs')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                            <i class="fa-solid fa-clock-rotate-left mr-1"></i> অডিট লগ
+                        </button>
+                    </nav>
+
+                    <div class="flex items-center space-x-2 border-l border-slate-700 pl-3">
+                        <button id="btnChangePassword" onclick="openCredentialModal()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-400 text-xs font-semibold rounded-lg border border-slate-700">
+                            <i class="fa-solid fa-key mr-1"></i> <span id="credBtnText">ক্রেডেনশিয়াল</span>
+                        </button>
+                        <button onclick="logout()" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white text-xs font-bold rounded-lg border border-rose-500/30 transition flex items-center gap-1">
+                            <i class="fa-solid fa-right-from-bracket"></i> লগআউট
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 max-w-md bg-slate-800 text-slate-100 rounded-xl shadow-2xl border border-slate-700 p-4 flex items-start space-x-3 no-print">
+        <div id="toastIcon" class="text-xl mt-0.5"></div>
+        <div class="flex-1">
+            <h4 id="toastTitle" class="font-bold text-sm">নোটিফিকেশন</h4>
+            <p id="toastMessage" class="text-xs text-slate-300 mt-0.5"></p>
+        </div>
+        <button onclick="hideToast()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+        <!-- VIEW 0: HOME LANDING -->
+        <section id="homeLandingView" class="min-h-[80vh] flex flex-col justify-center items-center py-10">
+            <div class="text-center max-w-2xl mx-auto space-y-4 mb-10">
+                <div class="w-20 h-20 bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 rounded-3xl flex items-center justify-center text-4xl shadow-2xl shadow-amber-500/20 mx-auto transform hover:scale-105 transition">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <h1 class="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+                    মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল
+                </h1>
+                <p class="text-base text-slate-400 font-normal">
+                    ড্রাইভিং প্রশিক্ষণ, ভর্তি ফরম ব্যবস্থাপনা এবং ডিজিটাল ক্লাস ভেরিফিকেশন সিস্টেম
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-3xl w-full">
+                <div onclick="showLoginModal('admin')" class="group bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 p-6 rounded-2xl shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-user-shield"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-amber-400 transition">প্রশাসনিক প্যানেল</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            শিক্ষার্থী ভর্তি, ভর্তি ফরম ব্যবস্থাপনা, ক্লাস অগ্রগতি পর্যবেক্ষণ এবং অফিসিয়াল ডকুমেন্ট তৈরি করুন।
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-amber-400 pt-4 border-t border-slate-800">
+                        <span>প্রশাসক হিসেবে প্রবেশ করুন</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+
+                <div onclick="showLoginModal('student')" class="group bg-slate-850 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 p-6 rounded-2xl shadow-xl transition-all duration-300 cursor-pointer flex flex-col justify-between">
+                    <div>
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400 flex items-center justify-center text-2xl mb-4 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-2 group-hover:text-indigo-400 transition">শিক্ষার্থী প্যানেল</h3>
+                        <p class="text-xs text-slate-400 leading-relaxed">
+                            নিজের ভর্তি ফরম ডাউনলোড করুন, ক্লাস অগ্রগতি দেখুন এবং OTP-এর মাধ্যমে ক্লাস কনফার্ম করুন।
+                        </p>
+                    </div>
+                    <div class="mt-6 flex items-center justify-between text-xs font-bold text-indigo-400 pt-4 border-t border-slate-800">
+                        <span>শিক্ষার্থী হিসেবে প্রবেশ করুন</span>
+                        <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-12 bg-slate-850/80 border border-slate-800 rounded-xl p-4 max-w-xl w-full text-center text-xs text-slate-400">
+                <p class="text-slate-300"><i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> এই সিস্টেমটি মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুলের অফিসিয়াল ব্যবস্থাপনার জন্য সংরক্ষিত।</p>
+                <p class="mt-2 text-[11px] text-slate-500">অননুমোদিত প্রবেশ সম্পূর্ণভাবে নিষিদ্ধ। প্রবেশের জন্য কর্তৃপক্ষের প্রদত্ত ক্রেডেনশিয়াল ব্যবহার করুন।</p>
+            </div>
+        </section>
+
+        <!-- VIEW 1: DASHBOARD -->
+        <section id="dashboardView" class="hidden space-y-6">
+            <div id="adminSummaryCards" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-slate-850 p-5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">মোট নিবন্ধিত শিক্ষার্থী</p>
+                        <h3 class="text-2xl font-black text-white mt-1" id="dashTotalStudents">0</h3>
+                        <span class="text-[11px] text-amber-400 mt-1 inline-block"><i class="fa-solid fa-user-check mr-1"></i>কোর্স সক্রিয়</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-users"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 p-5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">সংরক্ষিত ভর্তি ফরম</p>
+                        <h3 class="text-2xl font-black text-indigo-400 mt-1" id="dashAdmissionFormsCount">0</h3>
+                        <span class="text-[11px] text-slate-400 mt-1 inline-block"><i class="fa-solid fa-file-pdf mr-1 text-indigo-400"></i>অফিসিয়াল কপি</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-id-card"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 p-5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">সম্পন্ন প্র্যাকটিক্যাল ক্লাস</p>
+                        <h3 class="text-2xl font-black text-emerald-400 mt-1" id="dashCompletedClasses">0</h3>
+                        <span class="text-[11px] text-slate-400 mt-1 inline-block"><i class="fa-solid fa-shield-check mr-1 text-emerald-400"></i>ভেরিফাইড</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-circle-check"></i>
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 p-5 rounded-2xl border border-slate-800 flex items-center justify-between shadow-lg">
+                    <div>
+                        <p class="text-xs text-slate-400 font-medium">অবশিষ্ট ক্লাস সংখ্যা</p>
+                        <h3 class="text-2xl font-black text-amber-400 mt-1" id="dashRemainingClasses">0</h3>
+                        <span class="text-[11px] text-slate-400 mt-1 inline-block">গড় প্যাকেজ: ২৮ ক্লাস</span>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-400 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-business-time"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div id="studentPersonalCard" class="hidden bg-slate-850 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+                    <div class="flex items-center space-x-4">
+                        <div id="spAvatarContainer" class="w-14 h-14 rounded-2xl bg-amber-500 text-slate-950 font-black text-xl flex items-center justify-center shadow-lg overflow-hidden flex-shrink-0">
+                            <i class="fa-solid fa-user-graduate"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-white" id="spStudentName">শিক্ষার্থীর নাম</h2>
+                            <p class="text-xs text-slate-400">আইডি: <span id="spStudentId" class="text-amber-400 font-mono font-bold">DS-101</span> | কোর্স: <span id="spStudentCourse" class="text-slate-200">কার ড্রাইভ (২৮ ক্লাস)</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button onclick="viewOwnStudentAdmissionPdf()" class="px-4 py-2 bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500 hover:text-slate-950 font-bold border border-emerald-500/40 rounded-xl text-xs transition flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-base"></i> আমার ভর্তি ফরম ডাউনলোড
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400">সম্পন্ন প্র্যাকটিক্যাল ক্লাস</span>
+                        <h3 class="text-2xl font-black text-emerald-400 mt-1" id="spCompletedCount">0</h3>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800">
+                        <span class="text-xs text-slate-400">অবশিষ্ট ক্লাস</span>
+                        <h3 class="text-2xl font-black text-amber-400 mt-1" id="spRemainingCount">28</h3>
+                    </div>
+                    <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 flex flex-col justify-center">
+                        <span class="text-xs text-slate-400 mb-1">কোর্স অগ্রগতি:</span>
+                        <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700">
+                            <div id="spProgressBar" class="bg-amber-500 h-3 rounded-full transition-all duration-500" style="width: 0%"></div>
+                        </div>
+                        <span class="text-[11px] font-mono text-amber-400 mt-1 text-right" id="spPercentText">0%</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-slate-850 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-5 border-b border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2" id="tableHeaderTitle">
+                            <i class="fa-solid fa-address-book text-amber-400"></i> শিক্ষার্থী তালিকা ও ক্লাস অগ্রগতি
+                        </h2>
+                        <p class="text-xs text-slate-400" id="tableHeaderSub">নিবন্ধিত সকল শিক্ষার্থীর বর্তমান অবস্থা এবং ক্লাস রেকর্ড</p>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+                        <div id="adminSearchBox" class="relative">
+                            <input type="text" id="studentSearchInput" onkeyup="filterStudentList()" placeholder="নাম বা আইডি দিয়ে খুঁজুন..." class="pl-9 pr-4 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200 focus:outline-none focus:border-amber-500 w-48 sm:w-64">
+                            <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
+                        </div>
+                        <button id="btnAddStudent" onclick="openAddStudentModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-xl text-xs transition flex items-center gap-1.5 shadow-md">
+                            <i class="fa-solid fa-user-plus"></i> নতুন শিক্ষার্থী
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs sm:text-sm text-slate-300">
+                        <thead class="bg-slate-900/80 uppercase text-[11px] font-bold text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-4">শিক্ষার্থীর নাম ও আইডি</th>
+                                <th class="p-4">মোবাইল ও কোর্স</th>
+                                <th class="p-4">ভর্তি ফরম</th>
+                                <th class="p-4">ভর্তি ফি</th>
+                                <th class="p-4">মোট জমা</th>
+                                <th class="p-4">সম্পন্ন ক্লাস</th>
+                                <th class="p-4">অবশিষ্ট ক্লাস</th>
+                                <th class="p-4 text-right">অ্যাকশন</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentTableBody" class="divide-y divide-slate-800 font-sans"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 2: ADMISSION FORMS -->
+        <section id="admissionFormsView" class="hidden space-y-6">
+            <div class="bg-slate-850 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-file-pdf text-amber-400"></i> ভর্তি ফরম আর্কাইভ
+                        </h2>
+                        <p class="text-xs text-slate-400" id="admissionArchiveSubtitle">মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল - সংরক্ষিত অফিসিয়াল ভর্তি ফরমের তালিকা</p>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs sm:text-sm text-slate-300">
+                        <thead class="bg-slate-900 uppercase text-[10px] font-bold text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">ক্রমিক নং / তারিখ</th>
+                                <th class="p-3">শিক্ষার্থীর নাম (বাংলা ও ইংরেজি)</th>
+                                <th class="p-3">পিতা ও মাতার নাম</th>
+                                <th class="p-3">মোবাইল ও ঠিকানা</th>
+                                <th class="p-3 text-center">ছবি</th>
+                                <th class="p-3 text-right">ভর্তি ফরম / সংযুক্তি</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admissionFormsTableBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 3: CLASS VERIFICATION -->
+        <section id="verifyView" class="hidden space-y-6">
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 flex items-start space-x-3 mb-6">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400 text-xl mt-0.5"></i>
+                    <div>
+                        <h3 class="text-sm font-bold text-amber-300">প্র্যাকটিক্যাল ক্লাস ভেরিফিকেশন ও ডিজিটাল রেকর্ড সংরক্ষণ</h3>
+                        <p class="text-xs text-slate-300 mt-1">
+                            প্রতিটি প্র্যাকটিক্যাল ক্লাস সম্পন্ন হওয়ার পর শিক্ষার্থীর উপস্থিতি নিশ্চিত করে ডিজিটাল স্বাক্ষর ও ছবি সংরক্ষণ করুন। এডমিন প্যানেল থেকে উভয়ই **বাধ্যতামূলক**।
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 rounded-2xl border border-slate-800 shadow-2xl overflow-hidden">
+                    <div class="bg-gradient-to-r from-amber-500 to-amber-600 px-6 py-4 text-slate-950 flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-bold">
+                        <div>
+                            <h2 class="text-base font-extrabold flex items-center gap-2">
+                                <i class="fa-solid fa-file-signature"></i> প্র্যাকটিক্যাল ক্লাস ভেরিফিকেশন ফরম
+                            </h2>
+                            <p class="text-xs text-slate-900/80 font-normal">ক্লাস সম্পন্ন হওয়ার পর ডিজিটাল প্রমাণ সংরক্ষণ করুন</p>
+                        </div>
+                        
+                        <div class="bg-slate-950 text-amber-400 px-3 py-1.5 rounded-xl border border-amber-400/30 flex items-center space-x-2 font-mono text-xs">
+                            <i class="fa-solid fa-stopwatch animate-pulse text-amber-400"></i>
+                            <div>
+                                <span class="text-[10px] text-slate-400 block -mb-1">লাইভ OTP:</span>
+                                <span id="otpCodeDisplay" class="text-base font-extrabold tracking-wider text-amber-300">----</span>
+                            </div>
+                            <div class="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20" id="otpTimer">30s</div>
+                            <button type="button" onclick="refreshOtpManually()" class="otp-refresh-btn ml-1 w-6 h-6 rounded-md bg-amber-500/20 hover:bg-amber-500 text-amber-400 hover:text-slate-950 border border-amber-500/40 flex items-center justify-center transition" title="OTP রিফ্রেশ করুন">
+                                <i class="fa-solid fa-rotate-right text-[10px]"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="verificationForm" onsubmit="handleVerificationSubmit(event)" class="p-6 space-y-6">
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                            <label class="block text-xs font-bold uppercase text-amber-400 tracking-wider">১. শিক্ষার্থী নির্বাচন করুন *</label>
+                            <select id="verifyStudentSelect" required onchange="onVerifyStudentChange()" class="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-850 text-slate-100 text-sm focus:ring-2 focus:ring-amber-500 outline-none">
+                                <option value="">-- শিক্ষার্থী নির্বাচন করুন --</option>
+                            </select>
+
+                            <div id="verifyStudentProgress" class="hidden bg-slate-850 p-3 rounded-lg border border-slate-700/60 flex items-center justify-between">
+                                <div>
+                                    <span class="text-xs text-slate-400">ক্লাস অগ্রগতি:</span>
+                                    <span id="vClassProgressText" class="text-xs font-bold text-amber-400 ml-1">০ / ২৮ ক্লাস</span>
+                                </div>
+                                <div class="w-32 bg-slate-700 rounded-full h-2">
+                                    <div id="vProgressBar" class="bg-amber-500 h-2 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-4">
+                            <label class="block text-xs font-bold uppercase text-amber-400 tracking-wider">২. ক্লাসের বিবরণ *</label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">তারিখ ও সময় *</label>
+                                    <input type="datetime-local" id="lessonDateTime" required class="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">ট্রেনিং গাড়ির রেজিস্ট্রেশন নং *</label>
+                                    <input type="text" id="vehicleRegNo" placeholder="যেমন: ঢাকা মেট্রো-গ-১২-৩৪৫৬" required class="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">প্রশিক্ষকের নাম *</label>
+                                    <input type="text" id="instructorName" placeholder="প্রশিক্ষকের পূর্ণ নাম" required class="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-200">
+                                </div>
+                                <div>
+                                    <label class="block text-xs text-slate-400 mb-1">প্রশিক্ষণের বিষয় *</label>
+                                    <select id="lessonTopic" required class="w-full px-3 py-2.5 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-200">
+                                        <option value="স্ট্রিট ও ক্লাচ কন্ট্রোল">স্ট্রিট ও ক্লাচ কন্ট্রোল</option>
+                                        <option value="প্যারালাল পার্কিং (Parallel Parking)">প্যারালাল পার্কিং (Parallel Parking)</option>
+                                        <option value="রিভার্স ড্রাইভ ও পার্কিং (Reverse)">রিভার্স ড্রাইভ ও পার্কিং (Reverse)</option>
+                                        <option value="হিল ড্রাইভিং ও র্যাম্প স্টার্ট (Hill Driving)">হিল ড্রাইভিং ও র্যাম্প স্টার্ট (Hill Driving)</option>
+                                        <option value="হাইওয়ে ও ট্রাফিক জংশন ড্রাইভ">হাইওয়ে ও ট্রাফিক জংশন ড্রাইভ</option>
+                                        <option value="জরুরি ব্রেকিং ও ইউ-টার্ন">জরুরি ব্রেকিং ও ইউ-টার্ন</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="otpInputContainer" class="bg-slate-900 p-4 rounded-xl border border-amber-500/40 space-y-2">
+                            <label class="block text-xs font-bold uppercase text-amber-400 tracking-wider">
+                                <i class="fa-solid fa-key mr-1"></i> OTP যাচাইকরণ
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <input type="text" id="userOtpInput" maxlength="4" placeholder="৪ ডিজিটের OTP" class="px-4 py-3 bg-slate-850 border border-slate-700 rounded-xl font-mono text-center text-lg tracking-widest text-amber-400 font-bold focus:outline-none focus:border-amber-500 w-48">
+                                <p class="text-[11px] text-slate-400">শিক্ষার্থী প্যানেল থেকে OTP প্রদান করলে সেলফি বা স্বাক্ষর ছাড়াই ক্লাস সম্পন্ন হবে।</p>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-xs font-bold uppercase text-amber-400 tracking-wider">
+                                    ৩. শিক্ষার্থীর লাইভ ছবি <span id="photoReqNote" class="text-amber-400 font-bold lowercase">*</span>
+                                </label>
+                                <button type="button" onclick="startCamera()" class="text-xs text-amber-400 hover:underline flex items-center gap-1">
+                                    <i class="fa-solid fa-camera"></i> ক্যামেরা চালু করুন
+                                </button>
+                            </div>
+
+                            <div id="cameraArea" class="bg-slate-850 rounded-xl p-3 border border-slate-700 text-center flex flex-col items-center justify-center min-h-[160px]">
+                                <video id="videoElement" class="hidden w-full max-w-sm rounded-lg border border-slate-600 mb-2" autoplay playsinline></video>
+                                <canvas id="photoCanvas" class="hidden"></canvas>
+                                <img id="capturedPhotoPreview" class="hidden w-full max-w-xs rounded-lg border border-amber-500 mb-2 shadow-md">
+                                
+                                <div id="cameraPlaceholder" class="text-slate-500 py-4">
+                                    <i class="fa-solid fa-camera-retro text-3xl mb-2 text-slate-600"></i>
+                                    <p class="text-xs">ক্যামেরা চালু করে ক্লাসের ছবি তুলুন</p>
+                                </div>
+
+                                <div class="flex gap-2 mt-2">
+                                    <button type="button" id="snapBtn" onclick="takeSnapshot()" class="hidden px-4 py-2 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs">
+                                        <i class="fa-solid fa-aperture"></i> ছবি তুলুন
+                                    </button>
+                                    <button type="button" id="retakeBtn" onclick="retakePhoto()" class="hidden px-3 py-2 bg-slate-700 text-slate-200 rounded-lg text-xs">
+                                        <i class="fa-solid fa-rotate-left"></i> পুনরায় তুলুন
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-3">
+                            <div class="flex justify-between items-center">
+                                <label class="block text-xs font-bold uppercase text-amber-400 tracking-wider">
+                                    ৪. শিক্ষার্থীর ডিজিটাল স্বাক্ষর <span id="sigReqNote" class="text-amber-400 font-bold lowercase">*</span>
+                                </label>
+                                <button type="button" onclick="clearSignature()" class="text-xs text-rose-400 hover:underline flex items-center gap-1">
+                                    <i class="fa-solid fa-eraser"></i> মুছুন
+                                </button>
+                            </div>
+
+                            <div class="border-2 border-dashed border-amber-500/40 rounded-xl overflow-hidden bg-white">
+                                <canvas id="sigCanvas" class="signature-canvas w-full h-32"></canvas>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 font-extrabold py-4 px-6 rounded-xl shadow-xl transition flex items-center justify-center space-x-2 text-sm">
+                            <i class="fa-solid fa-shield-check text-lg"></i>
+                            <span>ক্লাস সম্পন্ন করুন এবং ডিজিটাল প্রমাণ সংরক্ষণ করুন</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- VIEW 4: AUDIT LOGS -->
+        <section id="logsView" class="hidden space-y-6">
+            <div class="bg-slate-850 rounded-2xl border border-slate-800 shadow-xl overflow-hidden">
+                <div class="p-5 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-white flex items-center gap-2">
+                            <i class="fa-solid fa-boxes-packing text-amber-400"></i> ডিজিটাল ক্লাস রেকর্ড ও অডিট লগ
+                        </h2>
+                        <p class="text-xs text-slate-400">যেকোনো ক্লাসের ডিজিটাল রেকর্ড প্রিন্ট বা ডাউনলোড করুন</p>
+                    </div>
+
+                    <div id="logFilterContainer" class="flex items-center space-x-2">
+                        <select id="logStudentFilter" onchange="filterAuditLogs()" class="px-3 py-2 bg-slate-900 border border-slate-700 rounded-xl text-xs text-slate-200">
+                            <option value="">-- সকল শিক্ষার্থী --</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left text-xs sm:text-sm text-slate-300">
+                        <thead class="bg-slate-900 uppercase text-[10px] font-bold text-slate-400 border-b border-slate-800">
+                            <tr>
+                                <th class="p-3">ক্লাসের তারিখ ও সময়</th>
+                                <th class="p-3">শিক্ষার্থী</th>
+                                <th class="p-3">গাড়ি নং ও বিষয়</th>
+                                <th class="p-3">প্রশিক্ষক</th>
+                                <th class="p-3">ডিজিটাল স্বাক্ষর</th>
+                                <th class="p-3">ছবি</th>
+                                <th class="p-3 text-right">রেকর্ড</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogsTableBody" class="divide-y divide-slate-800"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: ADD NEW STUDENT -->
+    <div id="addStudentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print overflow-y-auto">
+        <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-slate-700 shadow-2xl space-y-4 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-amber-400"></i> নতুন শিক্ষার্থী নিবন্ধন
+                </h3>
+                <button onclick="closeAddStudentModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleAddStudentSubmit(event)" class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">শিক্ষার্থীর পূর্ণ নাম *</label>
+                        <input type="text" id="newStudentName" required placeholder="শিক্ষার্থীর পূর্ণ নাম" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">শিক্ষার্থী আইডি *</label>
+                        <input type="text" id="newStudentId" required placeholder="যেমন: DS-104" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">মোবাইল নম্বর *</label>
+                        <input type="tel" id="newStudentPhone" required placeholder="01XXXXXXXXX" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">প্র্যাকটিক্যাল ক্লাস সংখ্যা *</label>
+                        <input type="number" id="newStudentQuota" value="28" required min="1" max="50" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">ভর্তি ফি (মোট) *</label>
+                        <input type="number" id="newStudentFee" value="0" min="0" required placeholder="যেমন: 15000" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">প্রাথমিক জমা *</label>
+                        <input type="number" id="newStudentDeposit" value="0" min="0" required placeholder="যেমন: 5000" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-3 rounded-xl border border-indigo-500/30 space-y-2">
+                    <span class="text-xs font-bold text-indigo-400 block"><i class="fa-solid fa-camera-retro mr-1"></i> শিক্ষার্থীর ছবি</span>
+                    <div class="flex items-center gap-3">
+                        <div class="w-16 h-16 rounded-full bg-slate-850 border-2 border-dashed border-indigo-500/40 overflow-hidden flex items-center justify-center flex-shrink-0 relative">
+                            <img id="newStudentPhotoPreview" class="hidden absolute inset-0 w-full h-full object-cover">
+                            <i id="newStudentPhotoIcon" class="fa-solid fa-user text-indigo-400 text-xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <input type="file" id="newStudentPhotoInput" accept="image/*" onchange="previewNewStudentPhoto(event)" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-500 file:text-white hover:file:bg-indigo-600">
+                            <p class="text-[10px] text-slate-500 mt-1">সর্বোচ্চ ৬০০ KB। ড্যাশবোর্ডে নামের পাশে এবং শিক্ষার্থী প্যানেলে প্রদর্শিত হবে।</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-900 p-3 rounded-xl border border-amber-500/30 space-y-3">
+                    <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-key mr-1"></i> শিক্ষার্থীর লগইন অ্যাক্সেস</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">ইউজারনেম *</label>
+                            <input type="text" id="newStudentUsername" required placeholder="ইউজারনেম" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-400 mb-1">পাসওয়ার্ড *</label>
+                            <input type="text" id="newStudentPassword" required placeholder="পাসওয়ার্ড" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-1">
+                    <button type="button" onclick="openAdmissionFormFillModal()" class="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-xs rounded-xl shadow-lg border border-emerald-400/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-file-signature text-base"></i>
+                        <span>ভর্তি ফরম পূরণ করুন</span>
+                    </button>
+                    <p class="text-[10px] text-slate-400 text-center mt-1">
+                        * প্রতিষ্ঠানের অফিসিয়াল ভর্তি ফরম অনুযায়ী তথ্য পূরণ করে A4 PDF তৈরি করুন।
+                    </p>
+                </div>
+
+                <div class="pt-1">
+                    <button type="button" id="attachmentUploadBtn" onclick="openAttachmentUploadModal()" class="w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-extrabold text-xs rounded-xl shadow-lg border border-indigo-400/30 transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paperclip text-base" id="attachmentUploadBtnIcon"></i>
+                        <span id="attachmentUploadBtnText">ফাইল সংযুক্তি</span>
+                    </button>
+                    <p class="text-[10px] text-slate-400 text-center mt-1" id="attachmentUploadBtnHint">
+                        * একসাথে একাধিক ফাইল আপলোড করুন — প্রতি ফাইল সর্বোচ্চ <b class="text-indigo-400">600 KB</b>।
+                    </p>
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeAddStudentModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-md">সংরক্ষণ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: ATTACHMENT UPLOAD -->
+    <div id="attachmentUploadModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print overflow-y-auto">
+        <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-indigo-500/40 shadow-2xl space-y-4 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-paperclip text-indigo-400"></i> ফাইল সংযুক্তি
+                </h3>
+                <button onclick="cancelAttachmentUpload()" class="text-slate-400 hover:text-white" title="বাতিল করুন"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-indigo-500/10 border border-indigo-500/30 rounded-xl p-3 text-xs text-indigo-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> সংযুক্তির নিয়মাবলী:</p>
+                <ul class="list-disc list-inside space-y-0.5 text-[11px] text-indigo-300">
+                    <li>একসাথে একাধিক ফাইল আপলোড করা যাবে</li>
+                    <li>প্রতি ফাইলের সর্বোচ্চ সাইজ: <b>৬০০ KB</b></li>
+                    <li>যেকোনো ফাইল ফরম্যাট (PDF, JPG, PNG, DOC, ZIP ইত্যাদি)</li>
+                    <li>সাইজ সীমা অতিক্রম করলে ফাইল বাদ যাবে</li>
+                    <li><b>সংরক্ষণ করুন</b> ক্লিক না করলে ফাইল সেভ হবে না</li>
+                </ul>
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-indigo-400 mb-2">ফাইল নির্বাচন করুন</label>
+                <input type="file" id="attachmentFileInput" multiple onchange="handleAttachmentUpload(event)" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-indigo-500 file:text-white hover:file:bg-indigo-600 cursor-pointer">
+            </div>
+
+            <div id="attachmentPendingList" class="space-y-2">
+                <p class="text-xs text-slate-500 text-center py-3">এখনো কোনো ফাইল নির্বাচন করা হয়নি।</p>
+            </div>
+
+            <div id="attachmentExistingList" class="space-y-2 hidden">
+                <p class="text-xs font-bold text-amber-400 border-t border-slate-700 pt-2">পূর্বের সংযুক্তি:</p>
+                <div id="existingAttachmentsContainer" class="space-y-1.5 max-h-40 overflow-y-auto custom-scrollbar"></div>
+            </div>
+
+            <div class="pt-2">
+                <button type="button" onclick="saveAttachments()" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-sm shadow-lg border border-emerald-400/30 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-save text-base"></i>
+                    <span>সংরক্ষণ করুন</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: VIEW ATTACHMENTS -->
+    <div id="viewAttachmentsModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print overflow-y-auto">
+        <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-indigo-500/40 shadow-2xl space-y-4 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-folder-open text-indigo-400"></i> সংযুক্ত ফাইলসমূহ
+                </h3>
+                <button onclick="closeViewAttachmentsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-slate-900 rounded-xl p-3 border border-slate-800">
+                <p class="text-xs text-slate-400">শিক্ষার্থী: <strong id="viewAttStudentName" class="text-white">-</strong> (<span id="viewAttStudentId" class="text-amber-400 font-mono">-</span>)</p>
+                <p class="text-xs text-slate-400 mt-1">মোট ফাইল: <strong id="viewAttCount" class="text-indigo-400">0</strong></p>
+            </div>
+
+            <div id="viewAttachmentsList" class="space-y-2 max-h-[60vh] overflow-y-auto custom-scrollbar"></div>
+
+            <div class="pt-2">
+                <button type="button" onclick="closeViewAttachmentsModal()" class="w-full py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: FILE PREVIEW -->
+    <div id="filePreviewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] flex items-center justify-center hidden p-2 sm:p-4 no-print overflow-y-auto">
+        <div class="bg-slate-900 rounded-2xl max-w-4xl w-full border border-indigo-500/40 shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+            <div class="bg-slate-850 p-4 border-b border-slate-700 flex justify-between items-center">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2 truncate">
+                    <i class="fa-solid fa-eye text-indigo-400"></i>
+                    <span id="previewFileName" class="truncate">ফাইল প্রিভিউ</span>
+                </h3>
+                <div class="flex items-center space-x-2 flex-shrink-0">
+                    <a id="previewDownloadBtn" download class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 shadow-md">
+                        <i class="fa-solid fa-download"></i> ডাউনলোড
+                    </a>
+                    <button onclick="closeFilePreview()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+
+            <div class="p-4 overflow-y-auto custom-scrollbar bg-slate-950 flex items-center justify-center" id="previewContentContainer" style="min-height: 400px;"></div>
+
+            <div class="bg-slate-850 p-3 border-t border-slate-700 text-center">
+                <p class="text-[11px] text-slate-400" id="previewFileMeta">-</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: ADMISSION FORM FILL-UP -->
+    <div id="admissionFillModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-2 sm:p-4 no-print overflow-y-auto">
+        <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-4 sm:p-6 shadow-2xl my-auto space-y-4 max-h-[95vh] overflow-y-auto custom-scrollbar">
+            
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-sm sm:text-base text-amber-400 flex items-center gap-2">
+                    <i class="fa-solid fa-file-pen"></i> মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল - ভর্তি ফরম
+                </h3>
+                <button onclick="closeAdmissionFillModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleAdmissionFormSubmit(event)" class="space-y-4 text-xs text-slate-200">
+                
+                <div class="grid grid-cols-2 gap-4 bg-slate-850 p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">ক্রমিক নং *</label>
+                        <input type="text" id="afSerialNo" required readonly class="w-full px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-amber-400 font-mono text-xs font-bold cursor-not-allowed">
+                    </div>
+                    <div>
+                        <label class="block text-slate-400 text-[11px] mb-1">ভর্তির তারিখ *</label>
+                        <input type="text" id="afAdmissionDate" required readonly placeholder="বাংলা তারিখ" class="w-full px-3 py-1.5 rounded bg-slate-800 border border-slate-700 text-amber-400 font-mono text-xs font-bold cursor-not-allowed">
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 p-3 rounded-xl border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+                    <div class="w-24 h-28 border-2 border-dashed border-amber-500/50 rounded flex flex-col items-center justify-center bg-slate-900 text-center p-1 relative overflow-hidden">
+                        <img id="afPhotoPreview" class="hidden absolute inset-0 w-full h-full object-cover">
+                        <div id="afPhotoPlaceholder" class="text-[10px] text-slate-400">
+                            <i class="fa-solid fa-user text-xl block mb-1 text-slate-500"></i>
+                            পাসপোর্ট সাইজের ছবি (১ কপি)
+                        </div>
+                    </div>
+                    <div class="flex-1 space-y-1">
+                        <label class="block text-xs font-semibold text-amber-400">শিক্ষার্থীর ছবি আপলোড করুন *</label>
+                        <input type="file" id="afPhotoInput" accept="image/*" onchange="previewAdmissionPhoto(event)" class="text-xs text-slate-400 file:mr-2 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-600">
+                        <p class="text-[10px] text-slate-500">ভর্তি ফরমের নির্ধারিত স্থানে এই ছবিটি সংযুক্ত হবে।</p>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-slate-850 p-3 rounded-xl border border-slate-800">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">১/ শিক্ষার্থীর নাম (বাংলা) *</label>
+                            <input type="text" id="afNameBn" required placeholder="বাংলায় নাম" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Name (English) *</label>
+                            <input type="text" id="afNameEn" required placeholder="English Name" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 uppercase">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">২/ পিতার নাম (বাংলা) *</label>
+                            <input type="text" id="afFatherNameBn" required placeholder="পিতার নাম" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Father's Name (English) *</label>
+                            <input type="text" id="afFatherNameEn" required placeholder="Father's Name" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 uppercase">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">৩/ মাতার নাম (বাংলা) *</label>
+                            <input type="text" id="afMotherNameBn" required placeholder="মাতার নাম" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">Mother's Name (English) *</label>
+                            <input type="text" id="afMotherNameEn" required placeholder="Mother's Name" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 uppercase">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">৪/ জন্ম তারিখ (দিন/মাস/বছর) *</label>
+                            <input type="text" id="afDob" required maxlength="10" placeholder="DD/MM/YYYY" oninput="formatDobInput(this)" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 font-mono tracking-wider">
+                            <p class="text-[10px] text-slate-500 mt-0.5">English বা বাংলা সংখ্যা টাইপ করুন — স্ল্যাশ স্বয়ংক্রিয়ভাবে বসবে</p>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">৫/ রক্তের গ্রুপ *</label>
+                            <select id="afBloodGroup" required class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                                <option value="A+">A+</option>
+                                <option value="A-">A-</option>
+                                <option value="B+">B+</option>
+                                <option value="B-">B-</option>
+                                <option value="AB+">AB+</option>
+                                <option value="AB-">AB-</option>
+                                <option value="O+">O+</option>
+                                <option value="O-">O-</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-slate-850 p-3 rounded-xl border border-slate-800 space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div class="space-y-2">
+                            <span class="font-bold text-amber-400 text-[11px]">৬/ স্থায়ী ঠিকানা</span>
+                            <div><input type="text" id="afPermVill" placeholder="গ্রাম:" oninput="syncAddressIfChecked()" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPermPost" placeholder="ডাকঘর:" oninput="syncAddressIfChecked()" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPermUpazila" placeholder="উপজেলা:" oninput="syncAddressIfChecked()" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPermDistrict" placeholder="জেলা:" oninput="syncAddressIfChecked()" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <div class="flex items-center justify-between">
+                                <span class="font-bold text-amber-400 text-[11px]">৭/ বর্তমান ঠিকানা</span>
+                                <label class="flex items-center gap-1.5 text-[11px] text-amber-300 cursor-pointer bg-slate-900 px-2 py-0.5 rounded border border-amber-500/30">
+                                    <input type="checkbox" id="sameAddressCheckbox" onchange="handleSameAddressToggle()" class="rounded text-amber-500">
+                                    <span>স্থায়ী ঠিকানার অনুরূপ</span>
+                                </label>
+                            </div>
+                            <div><input type="text" id="afPresVill" placeholder="গ্রাম:" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPresPost" placeholder="ডাকঘর:" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPresUpazila" placeholder="উপজেলা:" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                            <div><input type="text" id="afPresDistrict" placeholder="জেলা:" class="w-full px-2 py-1 bg-slate-900 border border-slate-700 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-slate-850 p-3 rounded-xl border border-slate-800">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-300 mb-1">৮/ শিক্ষাগত যোগ্যতা *</label>
+                        <div class="flex flex-wrap gap-4 text-xs">
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="edu" value="JSC" class="text-amber-500"> <span>JSC</span></label>
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="edu" value="SSC" checked class="text-amber-500"> <span>SSC</span></label>
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="edu" value="HSC" class="text-amber-500"> <span>HSC</span></label>
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="edu" value="Hon's+" class="text-amber-500"> <span>Hon's+</span></label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">৯/ বর্তমান পেশা</label>
+                            <input type="text" id="afJob" placeholder="পেশা" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">১০/ মোবাইল নম্বর *</label>
+                            <input type="tel" id="afPhone" required placeholder="01XXXXXXXXX" oninput="convertToBanglaDigits(this)" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 font-mono">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">১১/ জাতীয় পরিচয়পত্র / জন্মনিবন্ধন নং *</label>
+                            <input type="text" id="afNid" required placeholder="NID / Birth Reg No" oninput="convertToBanglaDigits(this)" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700 font-mono">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] text-slate-400 mb-1">১২/ পাসপোর্ট নম্বর (যদি থাকে)</label>
+                            <input type="text" id="afPassport" placeholder="Passport Number" class="w-full px-3 py-1.5 rounded bg-slate-900 border border-slate-700">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-300 mb-1">১৩/ বিদেশ গমনের ইচ্ছা আছে কি?</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="abroad" value="হ্যাঁ" class="text-amber-500"> <span>হ্যাঁ</span></label>
+                            <label class="flex items-center space-x-1 cursor-pointer"><input type="radio" name="abroad" value="না" checked class="text-amber-500"> <span>না</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeAdmissionFillModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-md">
+                        <i class="fa-solid fa-check-double mr-1"></i> ফরম সংরক্ষণ করুন
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+    <!-- MODAL: A4 PDF VIEW / PRINT -->
+    <div id="admissionPdfViewModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-2 sm:p-4">
+        <div class="bg-slate-900 rounded-2xl max-w-4xl w-full border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
+            
+            <div class="bg-slate-850 p-4 border-b border-slate-700 flex justify-between items-center no-print">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-pdf text-amber-400"></i> মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল - ভর্তি ফরম
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="window.print()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1 shadow-md hover:bg-amber-400">
+                        <i class="fa-solid fa-print"></i> প্রিন্ট / PDF সংরক্ষণ
+                    </button>
+                    <button onclick="closeAdmissionPdfModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+
+            <div class="p-4 sm:p-8 overflow-y-auto custom-scrollbar bg-white text-black flex justify-center" id="printableAdmissionForm">
+                <div class="pdf-paper p-8 space-y-4 text-black bg-white">
+                    
+                    <div class="flex justify-between items-center text-xs font-bold pdf-bn">
+                        <div>ক্রমিক নং- <span id="pdfSerialNo" class="border-b border-black px-3 font-bold text-sm">----</span></div>
+                        <div>ভর্তির তারিখ- <span id="pdfAdmissionDate" class="border-b border-black px-3 font-bold text-sm">--/--/----</span></div>
+                    </div>
+
+                    <div class="flex justify-between items-start pt-2 border-t-2 border-black">
+                        <div class="flex-1 pr-2">
+                            <h2 class="text-2xl font-black tracking-wide text-black leading-tight pdf-bn">মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল</h2>
+                            <p class="text-xs font-bold text-slate-800 pdf-bn">সোনার মোড়, চাঁপাইনবাবগঞ্জ</p>
+                            <div class="mt-3 inline-block px-6 py-1 border-2 border-black font-black text-base bg-slate-100 tracking-widest pdf-bn">
+                                ভর্তি ফরম
+                            </div>
+                        </div>
+
+                        <div class="w-28 h-32 border-2 border-black flex flex-col items-center justify-center text-center text-[10px] p-0.5 overflow-hidden bg-slate-50">
+                            <img id="pdfPhotoImg" class="w-full h-full object-cover hidden">
+                            <div id="pdfPhotoText" class="p-1 font-semibold leading-tight pdf-bn">
+                                পাসপোর্ট<br>সাইজের ছবি<br>(১ কপি)
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-xs font-medium leading-relaxed pt-3">
+                        
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pdf-bn">১/ শিক্ষার্থীর নাম</span>
+                            <span class="flex-1 border-b border-dotted border-black font-bold text-sm pdf-bn" id="pdfNameBn"></span>
+                        </div>
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pl-4 pdf-en">Name (English)</span>
+                            <span class="flex-1 border-b border-dotted border-black uppercase font-bold text-xs pdf-en" id="pdfNameEn"></span>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pdf-bn">২/ পিতার নাম</span>
+                            <span class="flex-1 border-b border-dotted border-black pdf-bn" id="pdfFatherNameBn"></span>
+                        </div>
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pl-4 pdf-en">Father's Name (En)</span>
+                            <span class="flex-1 border-b border-dotted border-black uppercase pdf-en" id="pdfFatherNameEn"></span>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pdf-bn">৩/ মাতার নাম</span>
+                            <span class="flex-1 border-b border-dotted border-black pdf-bn" id="pdfMotherNameBn"></span>
+                        </div>
+                        <div class="flex items-end">
+                            <span class="font-bold w-40 pl-4 pdf-en">Mother's Name (En)</span>
+                            <span class="flex-1 border-b border-dotted border-black uppercase pdf-en" id="pdfMotherNameEn"></span>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4 items-end pt-1">
+                            <div class="flex items-end">
+                                <span class="font-bold pdf-bn">৪/ জন্ম তারিখ</span>
+                                <span class="flex-1 border-b border-dotted border-black text-center font-bold ml-2 pdf-bn" id="pdfDob">দিন / মাস / বছর</span>
+                            </div>
+                            <div class="flex items-end">
+                                <span class="font-bold pdf-bn">৫/ রক্তের গ্রুপঃ</span>
+                                <span class="flex-1 border-b border-dotted border-black text-center font-bold ml-2 text-sm pdf-en" id="pdfBloodGroup"></span>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <span class="font-bold block pdf-bn">৬/ স্থায়ী ঠিকানা</span>
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 pl-4 mt-1 pdf-bn">
+                                <div class="flex items-end">গ্রাম: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPermVill"></span></div>
+                                <div class="flex items-end">ডাকঘর: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPermPost"></span></div>
+                                <div class="flex items-end">উপজেলা: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPermUpazila"></span></div>
+                                <div class="flex items-end">জেলা: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPermDistrict"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="pt-2">
+                            <span class="font-bold block pdf-bn">৭/ বর্তমান ঠিকানা</span>
+                            <div class="grid grid-cols-2 gap-x-6 gap-y-1.5 pl-4 mt-1 pdf-bn">
+                                <div class="flex items-end">গ্রাম: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPresVill"></span></div>
+                                <div class="flex items-end">ডাকঘর: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPresPost"></span></div>
+                                <div class="flex items-end">উপজেলা: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPresUpazila"></span></div>
+                                <div class="flex items-end">জেলা: <span class="flex-1 border-b border-dotted border-black ml-1 font-semibold" id="pdfPresDistrict"></span></div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-6 pt-2">
+                            <span class="font-bold pdf-bn">৮/ শিক্ষাগত যোগ্যতা</span>
+                            <div class="flex items-center gap-4 font-bold pdf-en">
+                                <span id="boxJsc">☐ JSC</span>
+                                <span id="boxSsc">☐ SSC</span>
+                                <span id="boxHsc">☐ HSC</span>
+                                <span id="boxHons">☐ Hon's+</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-end pt-1">
+                            <span class="font-bold w-36 pdf-bn">৯/ বর্তমান পেশা</span>
+                            <span class="flex-1 border-b border-dotted border-black font-semibold pdf-bn" id="pdfJob"></span>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span class="font-bold w-36 pdf-bn">১০/ মোবাইল নম্বর</span>
+                            <span class="flex-1 border-b border-dotted border-black font-bold text-sm pdf-bn" id="pdfPhone"></span>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span class="font-bold w-[220px] pdf-bn">১১/ জাতীয় পরিচয়পত্র/জন্মনিবন্ধন নং-</span>
+                            <span class="flex-1 border-b border-dotted border-black font-bold pdf-bn" id="pdfNid"></span>
+                        </div>
+
+                        <div class="flex items-end">
+                            <span class="font-bold w-36 pdf-bn">১২/ পাসপোর্ট নম্বর</span>
+                            <span class="flex-1 border-b border-dotted border-black pdf-en" id="pdfPassport"></span>
+                        </div>
+
+                        <div class="flex items-center gap-6 pt-1">
+                            <span class="font-bold pdf-bn">১৩/ বিদেশ গমনের ইচ্ছা আছে কি?</span>
+                            <div class="flex gap-6 font-bold pdf-bn">
+                                <span id="boxAbroadYes">☐ হ্যাঁ</span>
+                                <span id="boxAbroadNo">☐ না</span>
+                            </div>
+                        </div>
+
+                        <div class="pt-6 text-center border-t border-black mt-6">
+                            <h4 class="font-bold underline text-xs uppercase tracking-wide pdf-bn">প্রতিষ্ঠানের অঙ্গীকারনামা</h4>
+                            <p class="text-[11px] leading-relaxed mt-1 font-medium pdf-bn">
+                                আমি এই মর্মে অঙ্গীকার করছি যে, অত্র প্রতিষ্ঠানে ভর্তির পর প্রতিষ্ঠানের সকল নিয়ম-কানুন যথাযথভাবে মেনে চলতে বাধ্য থাকব।
+                            </p>
+                        </div>
+
+                        <div class="flex justify-between items-end pt-16 text-xs font-bold pdf-bn">
+                            <div class="border-t border-black pt-1 w-40 text-center">
+                                শিক্ষার্থীর স্বাক্ষর
+                            </div>
+                            <div class="border-t border-black pt-1 w-40 text-center">
+                                পরিচালকের স্বাক্ষর
+                            </div>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- MODAL: UNIVERSAL LOGIN MODAL -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-slate-700 shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 id="loginModalTitle" class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-lock text-amber-400"></i> প্রশাসনিক লগইন
+                </h3>
+                <button onclick="closeLoginModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <input type="hidden" id="loginRoleType" value="admin">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">ইউজারনেম *</label>
+                    <input type="text" id="loginUsername" required placeholder="আপনার ইউজারনেম লিখুন" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">পাসওয়ার্ড *</label>
+                    <input type="password" id="loginPassword" required placeholder="আপনার পাসওয়ার্ড লিখুন" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+                <div id="loginHelpText" class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[11px] text-slate-400">
+                    <i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> কর্তৃপক্ষের প্রদত্ত ক্রেডেনশিয়াল দিয়ে প্রবেশ করুন।
+                </div>
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeLoginModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition">প্রবেশ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: CREDENTIAL CHANGE -->
+    <div id="credentialModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-slate-700 shadow-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> <span id="credModalTitle">ক্রেডেনশিয়াল পরিবর্তন</span>
+                </h3>
+                <button onclick="closeCredentialModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <form onsubmit="handleCredentialSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">বর্তমান পাসওয়ার্ড *</label>
+                    <input type="password" id="oldPassword" required placeholder="বর্তমান পাসওয়ার্ড লিখুন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                </div>
+
+                <div id="newUsernameSection" class="hidden">
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">নতুন ইউজারনেম *</label>
+                    <input type="text" id="newUsername" placeholder="নতুন ইউজারনেম লিখুন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
+                    <p class="text-[10px] text-slate-500 mt-1">পরিবর্তন না করতে চাইলে খালি রাখুন</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">নতুন পাসওয়ার্ড *</label>
+                    <input type="password" id="newPassword" required placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">নতুন পাসওয়ার্ড পুনরায় লিখুন *</label>
+                    <input type="password" id="confirmPassword" required placeholder="পুনরায় নতুন পাসওয়ার্ড লিখুন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100">
+                </div>
+
+                <div class="pt-3 flex space-x-2">
+                    <button type="button" onclick="closeCredentialModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-md">আপডেট করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DELETE STUDENT -->
+    <div id="deleteStudentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-rose-500/40 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-700 pb-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <h3 class="font-bold text-base text-white">শিক্ষার্থী মুছে ফেলার নিশ্চিতকরণ</h3>
+            </div>
+
+            <div class="bg-rose-500/10 border border-rose-500/30 rounded-xl p-3 text-xs text-rose-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> সতর্কবার্তা!</p>
+                <p>আপনি কি নিশ্চিতভাবে <strong id="deleteStudentName" class="text-white">--</strong> (<span id="deleteStudentId" class="font-mono text-rose-300">--</span>) কে মুছে ফেলতে চান?</p>
+                <p class="mt-2 text-[11px] text-rose-300">শিক্ষার্থীর সকল তথ্য, ভর্তি ফরম, ক্লাস রেকর্ড, ডিজিটাল প্রমাণ এবং সংযুক্ত ফাইল স্থায়ীভাবে মুছে যাবে। এই কাজটি ফিরিয়ে আনা যাবে না।</p>
+            </div>
+
+            <div class="flex space-x-2 pt-2">
+                <button type="button" onclick="closeDeleteStudentModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs hover:bg-slate-700 transition">বাতিল</button>
+                <button type="button" onclick="confirmDeleteStudent()" class="flex-1 py-2.5 rounded-xl bg-rose-500 hover:bg-rose-600 text-white font-bold text-xs shadow-md transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-trash-can"></i> হ্যাঁ, মুছে ফেলুন
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PAYMENT -->
+    <div id="paymentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-emerald-500/40 shadow-2xl space-y-4 max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div class="flex items-center justify-between border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-money-bill-wave text-emerald-400"></i> জমা ও পেমেন্ট ব্যবস্থাপনা
+                </h3>
+                <button onclick="closePaymentModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-2">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400">শিক্ষার্থীর নাম:</span>
+                    <strong class="text-white text-sm" id="payStudentName">-</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400">শিক্ষার্থী আইডি:</span>
+                    <strong class="text-amber-400 font-mono text-sm" id="payStudentId">-</strong>
+                </div>
+                <div id="payFeeRow" class="flex justify-between items-center border-t border-slate-800 pt-2 mt-2">
+                    <span class="text-xs text-slate-400">মোট ভর্তি ফি:</span>
+                    <strong class="text-white font-mono" id="payTotalFee">৳ ০</strong>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400">মোট জমা:</span>
+                    <strong class="text-emerald-400 font-mono" id="payTotalDeposit">৳ ০</strong>
+                </div>
+                <div id="payDueRow" class="flex justify-between items-center bg-amber-500/10 border border-amber-500/30 rounded-lg p-2 mt-1">
+                    <span class="text-xs text-amber-300 font-bold">অবশিষ্ট:</span>
+                    <strong class="text-amber-400 font-mono text-base" id="payDue">৳ ০</strong>
+                </div>
+                <div id="payStudentNotice" class="hidden bg-indigo-500/10 border border-indigo-500/30 rounded-lg p-2 mt-2 text-[11px] text-indigo-300">
+                    <i class="fa-solid fa-lock mr-1"></i> আপনি শুধু আপনার জমার ইতিহাস দেখতে পারবেন। নতুন জমা যোগ করতে হলে অফিসে যোগাযোগ করুন।
+                </div>
+            </div>
+
+            <div id="newDepositSection" class="bg-slate-900 rounded-xl p-4 border border-emerald-500/30 space-y-3">
+                <span class="text-xs font-bold text-emerald-400 block"><i class="fa-solid fa-plus-circle mr-1"></i> নতুন জমা যোগ করুন</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">জমার পরিমাণ (৳) *</label>
+                        <input type="number" id="newDepositAmount" min="1" placeholder="5000" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">তারিখ *</label>
+                        <input type="date" id="newDepositDate" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 mb-1">নোট</label>
+                        <input type="text" id="newDepositNote" placeholder="যেমন: bKash" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100">
+                    </div>
+                </div>
+                <button type="button" onclick="submitNewDeposit()" class="w-full py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-md transition flex items-center justify-center gap-1">
+                    <i class="fa-solid fa-check"></i> জমা নিশ্চিত করুন
+                </button>
+            </div>
+
+            <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 space-y-2">
+                <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-history mr-1"></i> জমার ইতিহাস</span>
+                <div id="depositHistoryList" class="space-y-1.5 max-h-48 overflow-y-auto custom-scrollbar text-xs"></div>
+            </div>
+
+            <div class="pt-2 flex space-x-2">
+                <button type="button" onclick="closePaymentModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: PRINTABLE DIGITAL PROOF SLIP -->
+    <div id="proofSlipModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4">
+        <div class="bg-slate-900 rounded-2xl max-w-xl w-full border border-slate-700 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-slate-850 p-4 border-b border-slate-700 flex justify-between items-center no-print">
+                <h3 class="font-bold text-sm text-white flex items-center gap-2">
+                    <i class="fa-solid fa-file-invoice text-amber-400"></i> ক্লাস ভেরিফিকেশন রেকর্ড
+                </h3>
+                <div class="flex items-center space-x-2">
+                    <button onclick="window.print()" class="px-3 py-1.5 bg-amber-500 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-1">
+                        <i class="fa-solid fa-print"></i> প্রিন্ট / PDF
+                    </button>
+                    <button onclick="closeProofModal()" class="text-slate-400 hover:text-white p-1"><i class="fa-solid fa-xmark text-lg"></i></button>
+                </div>
+            </div>
+
+            <div class="p-6 overflow-y-auto custom-scrollbar space-y-6" id="printableProofSlip">
+                <div class="text-center border-b pb-4 border-slate-700">
+                    <h2 class="text-xl font-black text-amber-400 uppercase tracking-wide">মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল</h2>
+                    <p class="text-xs text-slate-400">অফিসিয়াল প্র্যাকটিক্যাল ক্লাস পারফরম্যান্স ও ডিজিটাল উপস্থিতি প্রমাণ</p>
+                    <span class="inline-block mt-2 px-3 py-1 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 rounded-full text-[10px] font-mono uppercase font-bold">
+                        Verified Legal Record
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-xs">
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">শিক্ষার্থীর নাম:</span>
+                        <strong class="text-white text-sm" id="slipStudentName">-</strong>
+                    </div>
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">শিক্ষার্থী আইডি:</span>
+                        <strong class="text-amber-400 font-mono text-sm" id="slipStudentId">-</strong>
+                    </div>
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">ক্লাসের তারিখ ও সময়:</span>
+                        <span class="text-slate-200 font-mono" id="slipDateTime">-</span>
+                    </div>
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">ট্রেনিং গাড়ি নম্বর:</span>
+                        <span class="text-slate-200" id="slipVehicleReg">-</span>
+                    </div>
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">প্রশিক্ষণের বিষয়:</span>
+                        <span class="text-slate-200 font-semibold" id="slipLessonTopic">-</span>
+                    </div>
+                    <div class="bg-slate-850 p-3 rounded-lg border border-slate-800">
+                        <span class="text-slate-500 block text-[10px]">প্রশিক্ষকের নাম:</span>
+                        <span class="text-slate-200" id="slipInstructor">-</span>
+                    </div>
+                </div>
+
+                <div class="bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl flex justify-between items-center">
+                    <div>
+                        <span class="text-xs text-amber-300 font-medium">কোর্স প্যাকেজের অবস্থা:</span>
+                        <h4 class="text-sm font-bold text-white mt-0.5" id="slipClassBalanceText">২৮টি ক্লাসের মধ্যে ১টি সম্পন্ন</h4>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-500 text-slate-950 font-black text-xs rounded-lg font-mono" id="slipRemainingText">২৭টি বাকি</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 pt-2">
+                    <div class="space-y-1">
+                        <span class="text-[11px] font-bold text-slate-400 block">ডিজিটাল স্বাক্ষর:</span>
+                        <div class="bg-white p-2 rounded-lg border border-slate-300 h-28 flex items-center justify-center" id="slipSignatureContainer">
+                            <img id="slipSignatureImg" class="max-h-full max-w-full object-contain" alt="Signature">
+                        </div>
+                    </div>
+                    <div class="space-y-1">
+                        <span class="text-[11px] font-bold text-slate-400 block">ক্লাসের ছবি:</span>
+                        <div class="bg-slate-950 rounded-lg border border-slate-800 h-28 overflow-hidden flex items-center justify-center" id="slipPhotoContainer">
+                            <img id="slipPhotoImg" class="h-full w-full object-cover" alt="Class Selfie">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-800 pt-3 text-[10px] text-slate-500 flex justify-between items-center font-mono">
+                    <div><span>ভেরিফিকেশন টাইপ: <span id="slipVerifyType" class="text-amber-400">Admin Photo & Signature Mandatory</span></span></div>
+                    <div><span>ভেরিফিকেশন আইডি: <b id="slipVerifyId" class="text-slate-400">DS-VRF-98231</b></span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- CLOUDINARY CONFIG — এখানে আপনার তথ্য বসান        -->
+    <!-- ================================================ -->
+    <script>
+        // ⚠️ IMPORTANT: আপনার Cloudinary তথ্য এখানে বসান
+        const CLOUDINARY_CONFIG = {
+            cloudName: 'il1rwddi',         // ← এখানে আপনার Cloud Name বসান
+            uploadPreset: 'mx_driving_school',    // ← এখানে আপনার Upload Preset Name
+            folder: 'mx-school'                   // Optional: Cloudinary-তে folder name
+        };
+    </script>
+
+    <!-- ================================ -->
+    <!-- FIREBASE SDK (Modular ESM)        -->
+    <!-- ================================ -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { 
+            getDatabase, ref, set, get, update, remove, onValue, push, child 
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfk521Qcy6dxhKv2hFFpAz-CiE5WT-Rr8",
+            authDomain: "mx-driving-school.firebaseapp.com",
+            databaseURL: "https://mx-driving-school-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "mx-driving-school",
+            storageBucket: "mx-driving-school.firebasestorage.app",
+            messagingSenderId: "310906702742",
+            appId: "1:310906702742:web:489ebc47cf159a8468abb7"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Expose Firebase API globally (No storage anymore — using Cloudinary)
+        window.FB = {
+            db,
+            ref, set, get, update, remove, onValue, push, child
+        };
+
+        window.dispatchEvent(new Event('firebase-ready'));
+    </script>
+
+    <!-- ================================ -->
+    <!-- MAIN APPLICATION SCRIPT          -->
+    <!-- ================================ -->
+    <script>
+        // ========== FIREBASE READY WAIT ==========
+        let FB = null;
+
+        function waitForFirebase() {
+            return new Promise((resolve) => {
+                if (window.FB) return resolve(window.FB);
+                window.addEventListener('firebase-ready', () => resolve(window.FB), { once: true });
+            });
+        }
+
+        // ========== DATABASE PATHS ==========
+        const DB_PATHS = {
+            ADMIN_CREDENTIALS: 'mx_school/admin_credentials',
+            STUDENTS: 'mx_school/students',
+            ADMISSION_FORMS: 'mx_school/admission_forms',
+            CLASS_LOGS: 'mx_school/class_logs'
+        };
+
+        // ========== IN-MEMORY STATE ==========
+        let adminCredentials = { username: 'Morsali', password: 'Morsalin' };
+        let students = [];
+        let admissionForms = [];
+        let classLogs = [];
+        let currentUser = null;
+
+        const DEFAULT_TOTAL_QUOTA = 28;
+        const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024; // 5 MB (Cloudinary free allows more than 600KB)
+
+        let currentOtp = "";
+        let otpTimeRemaining = 30;
+        let otpIntervalTimer = null;
+
+        let sigCanvas, sigCtx, isSigning = false;
+        let videoStream = null;
+        let capturedPhotoData = null;
+        let tempAdmissionPhoto = "";
+        let tempNewStudentPhoto = "";
+
+        let pendingDeleteStudentId = null;
+        let currentPaymentStudentId = null;
+
+        let tempAttachments = [];
+        let savedAttachmentsSnapshot = [];
+        let pendingAttachmentStudentId = null;
+        let currentViewAttachmentsStudentId = null;
+
+        // ========== SYNC STATUS UI ==========
+        function setSyncStatus(status) {
+            const dot = document.getElementById('syncStatus');
+            const text = document.getElementById('syncText');
+            if (!dot || !text) return;
+            dot.className = 'sync-dot';
+            if (status === 'online') {
+                dot.classList.add('sync-online');
+                text.innerText = 'সার্ভারের সাথে সংযুক্ত';
+            } else if (status === 'offline') {
+                dot.classList.add('sync-offline');
+                text.innerText = 'সংযোগ বিচ্ছিন্ন';
+            } else {
+                dot.classList.add('sync-syncing');
+                text.innerText = 'সার্ভারের সাথে সংযুক্ত হচ্ছে...';
+            }
+        }
+
+        // ========== BANGLA DIGIT CONVERSION ==========
+        function toBanglaDigits(str) {
+            if (str === null || str === undefined) return '';
+            const en = '0123456789';
+            const bn = '০১২৩৪৫৬৭৮৯';
+            return String(str).split('').map(ch => {
+                const idx = en.indexOf(ch);
+                return idx >= 0 ? bn[idx] : ch;
+            }).join('');
+        }
+
+        function toEnglishDigits(str) {
+            if (str === null || str === undefined) return '';
+            const en = '0123456789';
+            const bn = '০১২৩৪৫৬৭৮৯';
+            return String(str).split('').map(ch => {
+                const idx = bn.indexOf(ch);
+                return idx >= 0 ? en[idx] : ch;
+            }).join('');
+        }
+
+        function convertToBanglaDigits(input) {
+            const cur = input.value;
+            const bn = toBanglaDigits(cur);
+            if (bn !== cur) {
+                const pos = input.selectionStart;
+                input.value = bn;
+                try { input.setSelectionRange(pos, pos); } catch(e) {}
+            }
+        }
+
+        function getTodayBanglaDate() {
+            const d = new Date();
+            const dd = String(d.getDate()).padStart(2, '0');
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const yyyy = String(d.getFullYear());
+            return toBanglaDigits(dd + '/' + mm + '/' + yyyy);
+        }
+
+        function formatDobInput(input) {
+            let rawValue = toEnglishDigits(input.value);
+            let value = rawValue.replace(/\D/g, '');
+            if (value.length > 8) value = value.slice(0, 8);
+
+            let formatted = '';
+            if (value.length >= 1) formatted = value.substring(0, 2);
+            if (value.length >= 3) formatted += '/' + value.substring(2, 4);
+            if (value.length >= 5) formatted += '/' + value.substring(4, 8);
+
+            input.value = toBanglaDigits(formatted);
+        }
+
+        function getNextSerialNumber() {
+            if (admissionForms.length === 0) return "১০১";
+            let maxNum = 100;
+            admissionForms.forEach(af => {
+                const digits = (af.serialNo || "").replace(/[^\d০-৯]/g, '');
+                const enDigits = toEnglishDigits(digits);
+                const num = parseInt(enDigits) || 0;
+                if (num > maxNum) maxNum = num;
+            });
+            return toBanglaDigits(maxNum + 1);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+        }
+
+        // ============================================
+        // ⭐ CLOUDINARY UPLOAD FUNCTIONS (NEW)
+        // ============================================
+        async function uploadToCloudinary(base64Data, filename, resourceType = 'auto') {
+            try {
+                console.log('📤 Uploading to Cloudinary:', filename, '| Type:', resourceType);
+
+                // Convert base64 → Blob
+                const blob = await (await fetch(base64Data)).blob();
+                console.log('📦 Blob size:', Math.round(blob.size / 1024), 'KB');
+
+                // Create FormData
+                const formData = new FormData();
+                formData.append('file', blob);
+                formData.append('upload_preset', CLOUDINARY_CONFIG.uploadPreset);
+                if (CLOUDINARY_CONFIG.folder) {
+                    formData.append('folder', CLOUDINARY_CONFIG.folder);
+                }
+
+                // Sanitize filename
+                const safeName = String(filename || 'file').replace(/[^a-zA-Z0-9._-]/g, '_');
+                formData.append('public_id', `${Date.now()}_${safeName}`);
+
+                // Auto-detect resource type
+                let endpoint = 'auto/upload';
+                if (resourceType === 'image') endpoint = 'image/upload';
+                else if (resourceType === 'video') endpoint = 'video/upload';
+                else if (resourceType === 'raw') endpoint = 'raw/upload';
+
+                const url = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CONFIG.cloudName}/${endpoint}`;
+                console.log('🌐 POST:', url);
+
+                const response = await fetch(url, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('❌ Cloudinary error:', errorData);
+                    throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('✅ Upload success:', result.secure_url);
+                return result.secure_url;
+
+            } catch (error) {
+                console.error('❌ Cloudinary upload FAILED:', error);
+                throw error;
+            }
+        }
+
+        function getCloudinaryResourceType(mimeType, filename) {
+            const mime = (mimeType || '').toLowerCase();
+            const name = (filename || '').toLowerCase();
+            
+            if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(name)) return 'image';
+            if (mime.startsWith('video/') || /\.(mp4|webm|ogg|mov|avi)$/i.test(name)) return 'video';
+            return 'raw'; // PDF, DOC, ZIP etc.
+        }
+
+        // ========== FIREBASE SAVE HELPERS ==========
+        async function saveStudentToFirebase(student) {
+            const fb = await waitForFirebase();
+            await fb.set(fb.ref(fb.db, `${DB_PATHS.STUDENTS}/${student.id}`), student);
+        }
+
+        async function deleteStudentFromFirebase(studentId) {
+            const fb = await waitForFirebase();
+            await fb.remove(fb.ref(fb.db, `${DB_PATHS.STUDENTS}/${studentId}`));
+            await fb.remove(fb.ref(fb.db, `${DB_PATHS.ADMISSION_FORMS}/${studentId}`));
+
+            const logsSnap = await fb.get(fb.ref(fb.db, DB_PATHS.CLASS_LOGS));
+            if (logsSnap.exists()) {
+                const updates = {};
+                logsSnap.forEach((child) => {
+                    if (child.val().studentId === studentId) {
+                        updates[child.key] = null;
+                    }
+                });
+                if (Object.keys(updates).length > 0) {
+                    await fb.update(fb.ref(fb.db, DB_PATHS.CLASS_LOGS), updates);
+                }
+            }
+        }
+
+        async function saveAdmissionFormToFirebase(formData) {
+            const fb = await waitForFirebase();
+            await fb.set(fb.ref(fb.db, `${DB_PATHS.ADMISSION_FORMS}/${formData.studentId}`), formData);
+        }
+
+        async function saveClassLogToFirebase(logEntry) {
+            const fb = await waitForFirebase();
+            const newRef = fb.push(fb.ref(fb.db, DB_PATHS.CLASS_LOGS));
+            await fb.set(newRef, logEntry);
+        }
+
+        async function saveAdminCredentialsToFirebase(creds) {
+            const fb = await waitForFirebase();
+            await fb.set(fb.ref(fb.db, DB_PATHS.ADMIN_CREDENTIALS), creds);
+        }
+
+        // ========== INITIALIZE FIREBASE DATA ==========
+        async function initializeFirebaseData() {
+            const fb = await waitForFirebase();
+            setSyncStatus('syncing');
+
+            // 1) Admin credentials
+            const adminRef = fb.ref(fb.db, DB_PATHS.ADMIN_CREDENTIALS);
+            try {
+                const adminSnap = await fb.get(adminRef);
+                if (adminSnap.exists()) {
+                    adminCredentials = adminSnap.val();
+                } else {
+                    await fb.set(adminRef, { username: 'Morsali', password: 'Morsalin' });
+                }
+                fb.onValue(adminRef, (snap) => {
+                    if (snap.exists()) adminCredentials = snap.val();
+                });
+            } catch(err) {
+                console.warn('Admin credentials load error:', err);
+            }
+
+            // 2) Students
+            const studentsRef = fb.ref(fb.db, DB_PATHS.STUDENTS);
+            fb.onValue(studentsRef, (snap) => {
+                students = [];
+                if (snap.exists()) {
+                    snap.forEach((childSnap) => {
+                        students.push({ id: childSnap.key, ...childSnap.val() });
+                    });
+                }
+                if (typeof renderDashboard === 'function') renderDashboard();
+                if (typeof populateStudentDropdowns === 'function') populateStudentDropdowns();
+                setSyncStatus('online');
+            }, (error) => {
+                console.error('Students sync error:', error);
+                setSyncStatus('offline');
+            });
+
+            // 3) Admission forms
+            const formsRef = fb.ref(fb.db, DB_PATHS.ADMISSION_FORMS);
+            fb.onValue(formsRef, (snap) => {
+                admissionForms = [];
+                if (snap.exists()) {
+                    snap.forEach((childSnap) => {
+                        admissionForms.push({ _fbKey: childSnap.key, ...childSnap.val() });
+                    });
+                    admissionForms.sort((a, b) => {
+                        const numA = parseInt(toEnglishDigits((a.serialNo || '').replace(/[^\d০-৯]/g, ''))) || 0;
+                        const numB = parseInt(toEnglishDigits((b.serialNo || '').replace(/[^\d০-৯]/g, ''))) || 0;
+                        return numB - numA;
+                    });
+                }
+                if (typeof renderAdmissionFormsArchive === 'function') renderAdmissionFormsArchive();
+            });
+
+            // 4) Class logs
+            const logsRef = fb.ref(fb.db, DB_PATHS.CLASS_LOGS);
+            fb.onValue(logsRef, (snap) => {
+                classLogs = [];
+                if (snap.exists()) {
+                    snap.forEach((childSnap) => {
+                        classLogs.push({ _fbKey: childSnap.key, ...childSnap.val() });
+                    });
+                    classLogs.sort((a, b) => (b.dateTime || '').localeCompare(a.dateTime || ''));
+                }
+                if (typeof renderAuditLogsTable === 'function') renderAuditLogsTable();
+            });
+
+            // Restore session
+            const saved = sessionStorage.getItem('mx_session');
+            if (saved) {
+                try { currentUser = JSON.parse(saved); } catch(e) {}
+            }
+        }
+
+        // ========== APPLICATION STARTUP ==========
+        window.addEventListener('load', async () => {
+            initSignatureCanvas();
+            startOtpGenerator();
+
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('lessonDateTime').value = now.toISOString().slice(0,16);
+
+            // Verify Cloudinary config
+            if (CLOUDINARY_CONFIG.cloudName === 'YOUR_CLOUD_NAME') {
+                console.warn('⚠️ Cloudinary config not set! Please update CLOUDINARY_CONFIG.');
+                document.getElementById('loadingDetail').innerText = '⚠️ Cloudinary Cloud Name সেট করুন';
+            }
+
+            try {
+                await initializeFirebaseData();
+            } catch(err) {
+                console.error('Firebase init failed:', err);
+                document.getElementById('loadingDetail').innerText = 'সংযোগ ব্যর্থ: ' + err.message;
+                setSyncStatus('offline');
+            }
+
+            setTimeout(() => {
+                document.getElementById('loadingOverlay').classList.add('hidden-overlay');
+                if (currentUser) applyLoginStateUI();
+                else showHomeLanding();
+            }, 800);
+        });
+
+        // ========== OTP ==========
+        function startOtpGenerator() {
+            generateNewOtp();
+            if (otpIntervalTimer) clearInterval(otpIntervalTimer);
+            otpIntervalTimer = setInterval(() => {
+                otpTimeRemaining--;
+                document.getElementById('otpTimer').innerText = `${otpTimeRemaining}s`;
+                if (otpTimeRemaining <= 0) generateNewOtp();
+            }, 1000);
+        }
+
+        function generateNewOtp() {
+            currentOtp = Math.floor(1000 + Math.random() * 9000).toString();
+            otpTimeRemaining = 30;
+            const display = document.getElementById('otpCodeDisplay');
+            if (display) display.innerText = currentOtp;
+            document.getElementById('otpTimer').innerText = '30s';
+        }
+
+        function refreshOtpManually() {
+            generateNewOtp();
+            showToast("OTP রিফ্রেশ হয়েছে", "নতুন ৩০-সেকেন্ডের OTP তৈরি হয়েছে।", "success");
+        }
+
+        // ========== VIEW NAVIGATION ==========
+        function showHomeLanding() {
+            document.getElementById('appHeader').classList.add('hidden');
+            document.getElementById('homeLandingView').classList.remove('hidden');
+            document.getElementById('dashboardView').classList.add('hidden');
+            document.getElementById('admissionFormsView').classList.add('hidden');
+            document.getElementById('verifyView').classList.add('hidden');
+            document.getElementById('logsView').classList.add('hidden');
+        }
+
+        function applyLoginStateUI() {
+            document.getElementById('homeLandingView').classList.add('hidden');
+            document.getElementById('appHeader').classList.remove('hidden');
+
+            const roleBadge = document.getElementById('roleBadge');
+            const btnChangePass = document.getElementById('btnChangePassword');
+            const btnAddStud = document.getElementById('btnAddStudent');
+            const adminSearch = document.getElementById('adminSearchBox');
+            const credBtnText = document.getElementById('credBtnText');
+
+            if (currentUser.role === 'admin') {
+                roleBadge.innerText = "প্রশাসনিক প্যানেল";
+                roleBadge.className = "text-[10px] bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2 py-0.5 rounded-md font-mono font-normal";
+                btnChangePass.classList.remove('hidden');
+                btnAddStud.classList.remove('hidden');
+                adminSearch.classList.remove('hidden');
+                document.getElementById('adminSummaryCards').classList.remove('hidden');
+                document.getElementById('studentPersonalCard').classList.add('hidden');
+                credBtnText.innerText = "ক্রেডেনশিয়াল";
+            } else {
+                roleBadge.innerText = "শিক্ষার্থী প্যানেল";
+                roleBadge.className = "text-[10px] bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-md font-mono font-normal";
+                btnChangePass.classList.remove('hidden');
+                btnAddStud.classList.add('hidden');
+                adminSearch.classList.add('hidden');
+                document.getElementById('adminSummaryCards').classList.add('hidden');
+                document.getElementById('studentPersonalCard').classList.remove('hidden');
+                credBtnText.innerText = "পাসওয়ার্ড";
+            }
+
+            populateStudentDropdowns();
+            switchView('dashboard');
+        }
+
+        function switchView(viewName) {
+            const dash = document.getElementById('dashboardView');
+            const admission = document.getElementById('admissionFormsView');
+            const verify = document.getElementById('verifyView');
+            const logs = document.getElementById('logsView');
+
+            const btnDash = document.getElementById('navDashboardBtn');
+            const btnAdmission = document.getElementById('navAdmissionFormsBtn');
+            const btnVerify = document.getElementById('navVerifyBtn');
+            const btnLogs = document.getElementById('navLogsBtn');
+
+            dash.classList.add('hidden');
+            admission.classList.add('hidden');
+            verify.classList.add('hidden');
+            logs.classList.add('hidden');
+
+            btnDash.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+            btnAdmission.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+            btnVerify.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+            btnLogs.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+
+            if (viewName === 'dashboard') {
+                dash.classList.remove('hidden');
+                btnDash.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                renderDashboard();
+            } else if (viewName === 'admission_forms') {
+                admission.classList.remove('hidden');
+                btnAdmission.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                renderAdmissionFormsArchive();
+            } else if (viewName === 'verify') {
+                verify.classList.remove('hidden');
+                btnVerify.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                const vSelect = document.getElementById('verifyStudentSelect');
+                if (currentUser && currentUser.role === 'student') {
+                    vSelect.value = currentUser.studentId;
+                    vSelect.disabled = true;
+                } else {
+                    vSelect.disabled = false;
+                }
+                onVerifyStudentChange();
+                setTimeout(resizeCanvas, 100);
+            } else if (viewName === 'logs') {
+                logs.classList.remove('hidden');
+                btnLogs.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                renderAuditLogsTable();
+            }
+        }
+
+        function getTotalDeposit(student) {
+            if (!student.deposits || !Array.isArray(student.deposits)) return 0;
+            return student.deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+        }
+
+        // ========== RENDER DASHBOARD ==========
+        function renderDashboard() {
+            let visibleStudents = students;
+
+            if (currentUser && currentUser.role === 'student') {
+                visibleStudents = students.filter(s => s.id === currentUser.studentId);
+                const s = visibleStudents[0];
+                if (s) {
+                    document.getElementById('spStudentName').innerText = s.name;
+                    document.getElementById('spStudentId').innerText = s.id;
+                    document.getElementById('spStudentCourse').innerText = s.course || '২৮ ক্লাস প্যাকেজ';
+
+                    const spAvatar = document.getElementById('spAvatarContainer');
+                    if (s.photoUrl) {
+                        spAvatar.innerHTML = `<img src="${s.photoUrl}" class="w-full h-full object-cover" alt="${s.name}">`;
+                    } else {
+                        spAvatar.innerHTML = `<i class="fa-solid fa-user-graduate"></i>`;
+                    }
+
+                    const completed = s.completedCount || 0;
+                    const quota = s.totalQuota || DEFAULT_TOTAL_QUOTA;
+                    const remaining = Math.max(0, quota - completed);
+                    const percent = Math.min(100, Math.round((completed / quota) * 100));
+
+                    document.getElementById('spCompletedCount').innerText = completed;
+                    document.getElementById('spRemainingCount').innerText = remaining;
+                    document.getElementById('spProgressBar').style.width = `${percent}%`;
+                    document.getElementById('spPercentText').innerText = `${percent}% সম্পন্ন`;
+                }
+
+                document.getElementById('tableHeaderTitle').innerHTML = `<i class="fa-solid fa-address-book text-amber-400"></i> আপনার ক্লাসের ব্যক্তিগত রিপোর্ট`;
+                document.getElementById('tableHeaderSub').innerText = `আপনার মোট ২৮টি ক্লাসের বর্তমান অগ্রগতি বিবরণী`;
+            } else {
+                document.getElementById('tableHeaderTitle').innerHTML = `<i class="fa-solid fa-address-book text-amber-400"></i> শিক্ষার্থী তালিকা ও ক্লাস অগ্রগতি`;
+                document.getElementById('tableHeaderSub').innerText = `সকল নিবন্ধিত শিক্ষার্থীর বর্তমান অবস্থা এবং ক্লাস রেকর্ড`;
+
+                let totalStudents = students.length;
+                let totalCompleted = 0;
+                let totalRemaining = 0;
+
+                students.forEach(s => {
+                    const completed = s.completedCount || 0;
+                    const quota = s.totalQuota || DEFAULT_TOTAL_QUOTA;
+                    totalCompleted += completed;
+                    totalRemaining += Math.max(0, quota - completed);
+                });
+
+                document.getElementById('dashTotalStudents').innerText = totalStudents;
+                document.getElementById('dashAdmissionFormsCount').innerText = admissionForms.length;
+                document.getElementById('dashCompletedClasses').innerText = totalCompleted;
+                document.getElementById('dashRemainingClasses').innerText = totalRemaining;
+            }
+
+            const tbody = document.getElementById('studentTableBody');
+            tbody.innerHTML = '';
+
+            visibleStudents.forEach(s => {
+                const completed = s.completedCount || 0;
+                const quota = s.totalQuota || DEFAULT_TOTAL_QUOTA;
+                const remaining = Math.max(0, quota - completed);
+                const percent = Math.min(100, Math.round((completed / quota) * 100));
+
+                const hasPdf = admissionForms.some(af => af.studentId === s.id);
+                const isAdmin = (currentUser && currentUser.role === 'admin');
+
+                const feeCell = isAdmin
+                    ? `<span onclick="showFeeDetails('${s.id}')" class="money-mask text-xs font-mono text-slate-400" title="ক্লিক করে ভর্তি ফি দেখুন">****</span>`
+                    : `<span class="fee-locked text-xs font-mono text-slate-500" title="শুধু এডমিন দেখতে পারবেন"><i class="fa-solid fa-lock mr-1"></i>****</span>`;
+
+                const depositCell = isAdmin
+                    ? `<span onclick="openPaymentModal('${s.id}')" class="money-mask text-xs font-mono text-emerald-400 font-bold" title="ক্লিক করে জমা করুন/দেখুন">****</span>`
+                    : `<span onclick="openPaymentModal('${s.id}')" class="money-mask text-xs font-mono text-emerald-400 font-bold" title="ক্লিক করে জমার ইতিহাস দেখুন">****</span>`;
+
+                const avatarHtml = s.photoUrl 
+                    ? `<img src="${s.photoUrl}" class="student-avatar" alt="${s.name}">`
+                    : `<div class="student-avatar bg-slate-800 flex items-center justify-center text-slate-500"><i class="fa-solid fa-user"></i></div>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/50 transition border-b border-slate-800/60";
+                tr.innerHTML = `
+                    <td class="p-4">
+                        <div class="flex items-center gap-3">
+                            ${avatarHtml}
+                            <div>
+                                <div class="font-bold text-white text-sm">${s.name}</div>
+                                <div class="text-xs text-amber-400 font-mono">${s.id}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <div class="text-xs text-slate-300 font-mono">${s.phone}</div>
+                        <div class="text-[11px] text-slate-500">${s.course || '২৮ প্র্যাকটিক্যাল প্যাকেজ'}</div>
+                    </td>
+                    <td class="p-4">
+                        ${hasPdf ? 
+                            `<button onclick="viewAdmissionPdfForStudent('${s.id}')" class="px-2.5 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 rounded-lg text-xs font-bold hover:bg-emerald-500 hover:text-slate-950 transition flex items-center gap-1">
+                                <i class="fa-solid fa-file-pdf"></i> ফরম দেখুন
+                             </button>` : 
+                            (isAdmin ? `<button onclick="startFillFormForStudent('${s.id}')" class="px-2.5 py-1 bg-amber-500/20 text-amber-400 border border-amber-500/40 rounded-lg text-xs font-bold hover:bg-amber-500 hover:text-slate-950 transition flex items-center gap-1" title="ভর্তি ফরম পূরণ করুন">
+                                <i class="fa-solid fa-file-pen"></i> ফরম বাকি
+                             </button>` : `<span class="text-[11px] text-slate-500 italic"><i class="fa-solid fa-triangle-exclamation mr-1 text-amber-400"></i>ফরম বাকি</span>`)
+                        }
+                    </td>
+                    <td class="p-4">${feeCell}</td>
+                    <td class="p-4">${depositCell}</td>
+                    <td class="p-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-20 bg-slate-800 rounded-full h-2 overflow-hidden border border-slate-700">
+                                <div class="bg-amber-500 h-2 rounded-full" style="width: ${percent}%"></div>
+                            </div>
+                            <span class="font-bold text-xs text-amber-400 font-mono">${completed} / ${quota}</span>
+                        </div>
+                    </td>
+                    <td class="p-4">
+                        <span class="px-2 py-0.5 rounded text-xs font-bold font-mono ${remaining === 0 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-300'}">
+                            ${remaining === 0 ? 'সম্পন্ন' : remaining + 'টি বাকি'}
+                        </span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="startVerifyForStudent('${s.id}')" class="px-3 py-1.5 bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-slate-950 border border-amber-500/40 font-bold rounded-lg text-xs transition flex items-center gap-1">
+                                <i class="fa-solid fa-signature"></i> ভেরিফাই
+                            </button>
+                            ${isAdmin ? `
+                            <button onclick="openDeleteStudentModal('${s.id}')" class="px-2.5 py-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white border border-rose-500/40 font-bold rounded-lg text-xs transition flex items-center gap-1" title="শিক্ষার্থী মুছে ফেলুন">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                            ` : ''}
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ========== ATTACHMENTS ==========
+        function openAttachmentUploadModal() {
+            tempAttachments = [];
+            pendingAttachmentStudentId = document.getElementById('newStudentId').value.trim() || null;
+            
+            if (pendingAttachmentStudentId) {
+                const existingStudent = students.find(s => s.id === pendingAttachmentStudentId);
+                if (existingStudent && existingStudent.attachments) {
+                    savedAttachmentsSnapshot = JSON.parse(JSON.stringify(existingStudent.attachments));
+                } else {
+                    savedAttachmentsSnapshot = [];
+                }
+            } else {
+                savedAttachmentsSnapshot = [];
+            }
+            
+            document.getElementById('attachmentFileInput').value = '';
+            renderPendingAttachments();
+            
+            const existingContainer = document.getElementById('attachmentExistingList');
+            const existingAttachmentsDiv = document.getElementById('existingAttachmentsContainer');
+            existingAttachmentsDiv.innerHTML = '';
+
+            if (pendingAttachmentStudentId) {
+                const existingStudent = students.find(s => s.id === pendingAttachmentStudentId);
+                if (existingStudent && existingStudent.attachments && existingStudent.attachments.length > 0) {
+                    existingContainer.classList.remove('hidden');
+                    existingStudent.attachments.forEach(att => {
+                        existingAttachmentsDiv.innerHTML += `
+                            <div class="flex items-center gap-2 bg-slate-850 p-2 rounded-lg border border-slate-800 text-xs">
+                                <i class="fa-solid fa-file text-indigo-400"></i>
+                                <span class="flex-1 truncate text-slate-300">${att.name}</span>
+                                <span class="text-slate-500 text-[10px]">${formatFileSize(att.size)}</span>
+                            </div>
+                        `;
+                    });
+                } else {
+                    existingContainer.classList.add('hidden');
+                }
+            } else {
+                existingContainer.classList.add('hidden');
+            }
+
+            document.getElementById('attachmentUploadModal').classList.remove('hidden');
+        }
+
+        function cancelAttachmentUpload() {
+            tempAttachments = [];
+            pendingAttachmentStudentId = null;
+            savedAttachmentsSnapshot = [];
+            document.getElementById('attachmentUploadModal').classList.add('hidden');
+        }
+
+        async function saveAttachments() {
+            if (!pendingAttachmentStudentId) {
+                if (tempAttachments.length === 0) {
+                    showToast("কোনো ফাইল নেই", "সংরক্ষণ করার আগে অন্তত একটি ফাইল যুক্ত করুন।", "warning");
+                    return;
+                }
+                updateAttachmentBtnState(tempAttachments.length);
+                document.getElementById('attachmentUploadModal').classList.add('hidden');
+                showToast("সংরক্ষিত", `${tempAttachments.length}টি ফাইল সংরক্ষিত হয়েছে। শিক্ষার্থী সেভ হলে স্বয়ংক্রিয়ভাবে যুক্ত হবে।`, "success");
+                return;
+            }
+
+            const s = students.find(x => x.id === pendingAttachmentStudentId);
+            if (!s) {
+                document.getElementById('attachmentUploadModal').classList.add('hidden');
+                return;
+            }
+
+            if (!s.attachments) s.attachments = [];
+
+            showToast("আপলোড হচ্ছে", "ফাইল Cloudinary-তে আপলোড করা হচ্ছে...", "info");
+
+            for (const att of tempAttachments) {
+                try {
+                    let fileUrl = att.dataUrl;
+                    try {
+                        fileUrl = await uploadToCloudinary(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name));
+                    } catch(err) {
+                        console.warn('Cloudinary upload failed, using base64:', err);
+                    }
+                    if (!s.attachments.some(a => a.name === att.name && a.size === att.size && a.uploadedAt === att.uploadedAt)) {
+                        s.attachments.push({
+                            name: att.name,
+                            size: att.size,
+                            type: att.type,
+                            url: fileUrl,
+                            dataUrl: fileUrl,
+                            uploadedAt: att.uploadedAt
+                        });
+                    }
+                } catch(err) {
+                    console.error('Attachment save error:', err);
+                }
+            }
+
+            try {
+                await saveStudentToFirebase(s);
+                showToast("সংরক্ষণ সফল", `${s.attachments.length}টি ফাইল সংরক্ষিত হয়েছে।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase-এ save ব্যর্থ: " + err.message, "error");
+            }
+
+            tempAttachments = [];
+            pendingAttachmentStudentId = null;
+            savedAttachmentsSnapshot = [];
+
+            document.getElementById('attachmentUploadModal').classList.add('hidden');
+            updateAttachmentBtnState(s.attachments.length);
+        }
+
+        function updateAttachmentBtnState(count) {
+            const btnText = document.getElementById('attachmentUploadBtnText');
+            const btnHint = document.getElementById('attachmentUploadBtnHint');
+            const btnIcon = document.getElementById('attachmentUploadBtnIcon');
+            const btn = document.getElementById('attachmentUploadBtn');
+
+            if (count > 0) {
+                btnText.innerText = `✓ ${count}টি ফাইল সংযুক্ত`;
+                btnIcon.className = "fa-solid fa-circle-check text-base";
+                btn.className = "w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-extrabold text-xs rounded-xl shadow-lg border border-emerald-400/30 transition flex items-center justify-center gap-2";
+                if (btnHint) btnHint.innerHTML = `* সফলভাবে ${count}টি ফাইল সংযুক্ত হয়েছে। আরও ফাইল যুক্ত করতে ক্লিক করুন।`;
+            } else {
+                btnText.innerText = "ফাইল সংযুক্তি";
+                btnIcon.className = "fa-solid fa-paperclip text-base";
+                btn.className = "w-full py-3 bg-gradient-to-r from-indigo-500 to-purple-600 hover:from-indigo-600 hover:to-purple-700 text-white font-extrabold text-xs rounded-xl shadow-lg border border-indigo-400/30 transition flex items-center justify-center gap-2";
+                if (btnHint) btnHint.innerHTML = `* একসাথে একাধিক ফাইল আপলোড করুন — প্রতি ফাইল সর্বোচ্চ <b class="text-indigo-400">5 MB</b>।`;
+            }
+        }
+
+        function handleAttachmentUpload(event) {
+            const files = event.target.files;
+            if (!files || files.length === 0) return;
+
+            let addedCount = 0;
+            let rejectedCount = 0;
+
+            Array.from(files).forEach(file => {
+                if (file.size > MAX_ATTACHMENT_SIZE) {
+                    rejectedCount++;
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    tempAttachments.push({
+                        name: file.name,
+                        size: file.size,
+                        type: file.type,
+                        dataUrl: e.target.result,
+                        uploadedAt: new Date().toISOString()
+                    });
+                    renderPendingAttachments();
+                };
+                reader.readAsDataURL(file);
+                addedCount++;
+            });
+
+            if (rejectedCount > 0) {
+                showToast("সাইজ সীমা অতিক্রম", `${rejectedCount}টি ফাইল ৫ MB-র বেশি হওয়ায় বাদ দেওয়া হয়েছে।`, "warning");
+            }
+            if (addedCount > 0) {
+                showToast("ফাইল যুক্ত হয়েছে", `${addedCount}টি ফাইল যুক্ত হয়েছে। "সংরক্ষণ করুন" ক্লিক করুন।`, "success");
+            }
+
+            event.target.value = '';
+        }
+
+        function renderPendingAttachments() {
+            const container = document.getElementById('attachmentPendingList');
+            container.innerHTML = '';
+
+            if (tempAttachments.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-500 text-center py-3">এখনো কোনো ফাইল নির্বাচন করা হয়নি।</p>`;
+                return;
+            }
+
+            tempAttachments.forEach((att, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 bg-slate-900 p-2 rounded-lg border border-indigo-500/30 text-xs";
+                div.innerHTML = `
+                    <i class="fa-solid fa-file text-indigo-400"></i>
+                    <span class="flex-1 truncate text-slate-300">${att.name}</span>
+                    <span class="text-slate-500 text-[10px]">${formatFileSize(att.size)}</span>
+                    <button type="button" onclick="removePendingAttachment(${idx})" class="text-rose-400 hover:text-rose-300">
+                        <i class="fa-solid fa-times"></i>
+                    </button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function removePendingAttachment(idx) {
+            tempAttachments.splice(idx, 1);
+            renderPendingAttachments();
+        }
+
+        function openViewAttachmentsModal(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+
+            currentViewAttachmentsStudentId = studentId;
+            document.getElementById('viewAttStudentName').innerText = s.name;
+            document.getElementById('viewAttStudentId').innerText = s.id;
+
+            const list = document.getElementById('viewAttachmentsList');
+            list.innerHTML = '';
+
+            const attachments = s.attachments || [];
+            document.getElementById('viewAttCount').innerText = attachments.length;
+
+            if (attachments.length === 0) {
+                list.innerHTML = `<p class="text-xs text-slate-500 text-center py-4">কোনো সংযুক্ত ফাইল নেই।</p>`;
+            } else {
+                attachments.forEach((att, idx) => {
+                    const fileUrl = att.url || att.dataUrl;
+                    const div = document.createElement('div');
+                    div.className = "flex items-center gap-3 bg-slate-900 p-3 rounded-lg border border-indigo-500/30";
+                    div.innerHTML = `
+                        <div class="w-10 h-10 rounded-lg bg-indigo-500/20 border border-indigo-500/40 flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid fa-file text-indigo-400"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs font-bold text-white truncate">${att.name}</div>
+                            <div class="text-[10px] text-slate-500">${formatFileSize(att.size)} · ${att.type || 'Unknown'}</div>
+                        </div>
+                        <button onclick="previewFileByIndex('${studentId}', ${idx})" class="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white border border-indigo-500/40 rounded-lg text-[10px] font-bold transition" title="প্রিভিউ">
+                            <i class="fa-solid fa-eye"></i>
+                        </button>
+                        <a href="${fileUrl}" download="${att.name}" target="_blank" class="px-2.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-slate-950 border border-emerald-500/40 rounded-lg text-[10px] font-bold transition">
+                            <i class="fa-solid fa-download"></i>
+                        </a>
+                    `;
+                    list.appendChild(div);
+                });
+            }
+
+            document.getElementById('viewAttachmentsModal').classList.remove('hidden');
+        }
+
+        function closeViewAttachmentsModal() {
+            currentViewAttachmentsStudentId = null;
+            document.getElementById('viewAttachmentsModal').classList.add('hidden');
+        }
+
+        function previewFileByIndex(studentId, idx) {
+            const s = students.find(x => x.id === studentId);
+            if (!s || !s.attachments || !s.attachments[idx]) return;
+
+            const att = s.attachments[idx];
+            const fileUrl = att.url || att.dataUrl;
+
+            document.getElementById('previewFileName').innerText = att.name;
+            document.getElementById('previewDownloadBtn').href = fileUrl;
+            document.getElementById('previewDownloadBtn').download = att.name;
+            document.getElementById('previewFileMeta').innerText = `${formatFileSize(att.size)} · ${att.type || 'Unknown'}`;
+
+            const container = document.getElementById('previewContentContainer');
+            container.innerHTML = '';
+
+            const mime = (att.type || '').toLowerCase();
+            const nameLower = (att.name || '').toLowerCase();
+
+            if (mime.startsWith('image/') || /\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i.test(nameLower)) {
+                container.innerHTML = `<img src="${fileUrl}" class="max-w-full max-h-[75vh] object-contain rounded-lg shadow-lg" alt="${att.name}">`;
+            } else if (mime === 'application/pdf' || nameLower.endsWith('.pdf')) {
+                container.innerHTML = `<iframe src="${fileUrl}" class="w-full rounded-lg" style="height: 75vh; border: none;"></iframe>`;
+            } else if (mime.startsWith('video/') || /\.(mp4|webm|ogg|mov|avi)$/i.test(nameLower)) {
+                container.innerHTML = `<video src="${fileUrl}" controls class="max-w-full max-h-[75vh] rounded-lg shadow-lg"></video>`;
+            } else if (mime.startsWith('audio/') || /\.(mp3|wav|ogg|m4a)$/i.test(nameLower)) {
+                container.innerHTML = `<div class="text-center space-y-4 py-8">
+                    <i class="fa-solid fa-music text-6xl text-indigo-400"></i>
+                    <div class="text-sm font-bold text-white">${att.name}</div>
+                    <audio src="${fileUrl}" controls class="w-full max-w-md mx-auto"></audio>
+                </div>`;
+            } else {
+                container.innerHTML = `<div class="text-center space-y-3 py-8">
+                    <i class="fa-solid fa-file text-6xl text-slate-500"></i>
+                    <p class="text-sm text-slate-300 font-bold">${att.name}</p>
+                    <a href="${fileUrl}" download="${att.name}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-xs transition">
+                        <i class="fa-solid fa-download"></i> ডাউনলোড করুন
+                    </a>
+                </div>`;
+            }
+
+            document.getElementById('filePreviewModal').classList.remove('hidden');
+        }
+
+        function closeFilePreview() {
+            document.getElementById('filePreviewModal').classList.add('hidden');
+            document.getElementById('previewContentContainer').innerHTML = '';
+        }
+
+        // ========== STUDENT PHOTO ==========
+        function previewNewStudentPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.size > MAX_ATTACHMENT_SIZE) {
+                showToast("সাইজ সীমা অতিক্রম", "ছবিটি ৫ MB-র বেশি। ছোট ছবি নির্বাচন করুন।", "error");
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempNewStudentPhoto = e.target.result;
+                const preview = document.getElementById('newStudentPhotoPreview');
+                const icon = document.getElementById('newStudentPhotoIcon');
+                preview.src = tempNewStudentPhoto;
+                preview.classList.remove('hidden');
+                icon.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // ========== FEE & PAYMENT ==========
+        function showFeeDetails(studentId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("অনুমতি নেই", "শুধুমাত্র প্রশাসক ভর্তি ফি দেখতে পারেন।", "error");
+                return;
+            }
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+            showToast("ভর্তি ফি", `${s.name} (${s.id}) — মোট ভর্তি ফি: ৳ ${s.admissionFee || 0}`, "info");
+        }
+
+        function startFillFormForStudent(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+            openAdmissionFormFillModal();
+            document.getElementById('afNameEn').value = s.name || '';
+            document.getElementById('afPhone').value = toBanglaDigits(s.phone || '');
+        }
+
+        function openPaymentModal(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+
+            currentPaymentStudentId = studentId;
+
+            const isAdmin = (currentUser && currentUser.role === 'admin');
+            const isStudent = (currentUser && currentUser.role === 'student');
+
+            document.getElementById('payStudentName').innerText = s.name;
+            document.getElementById('payStudentId').innerText = s.id;
+            
+            const totalDep = getTotalDeposit(s);
+            document.getElementById('payTotalDeposit').innerText = '৳ ' + totalDep;
+
+            if (isStudent) {
+                document.getElementById('payFeeRow').classList.add('hidden');
+                document.getElementById('payDueRow').classList.add('hidden');
+                document.getElementById('newDepositSection').classList.add('hidden');
+                document.getElementById('payStudentNotice').classList.remove('hidden');
+            } else {
+                document.getElementById('payFeeRow').classList.remove('hidden');
+                document.getElementById('payDueRow').classList.remove('hidden');
+                document.getElementById('newDepositSection').classList.remove('hidden');
+                document.getElementById('payStudentNotice').classList.add('hidden');
+
+                document.getElementById('payTotalFee').innerText = '৳ ' + (s.admissionFee || 0);
+                const due = Math.max(0, (s.admissionFee || 0) - totalDep);
+                document.getElementById('payDue').innerText = '৳ ' + due;
+
+                const today = new Date().toISOString().slice(0, 10);
+                document.getElementById('newDepositDate').value = today;
+                document.getElementById('newDepositAmount').value = '';
+                document.getElementById('newDepositNote').value = '';
+            }
+
+            renderDepositHistory(s);
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closePaymentModal() {
+            currentPaymentStudentId = null;
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        function renderDepositHistory(student) {
+            const list = document.getElementById('depositHistoryList');
+            list.innerHTML = '';
+
+            if (!student.deposits || student.deposits.length === 0) {
+                list.innerHTML = `<p class="text-slate-500 text-center py-3">এখনো কোনো জমা নেই।</p>`;
+                return;
+            }
+
+            [...student.deposits].reverse().forEach((d, idx) => {
+                const div = document.createElement('div');
+                div.className = "flex justify-between items-center bg-slate-850 p-2 rounded-lg border border-slate-800";
+                div.innerHTML = `
+                    <div>
+                        <div class="text-emerald-400 font-mono font-bold text-sm">৳ ${d.amount}</div>
+                        <div class="text-[10px] text-slate-500 font-mono">${d.date || '-'} ${d.note ? '· ' + d.note : ''}</div>
+                    </div>
+                    <span class="text-[10px] text-slate-500">#${student.deposits.length - idx}</span>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        async function submitNewDeposit() {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("অনুমতি নেই", "শুধুমাত্র প্রশাসক জমা যোগ করতে পারেন।", "error");
+                return;
+            }
+
+            if (!currentPaymentStudentId) return;
+
+            const amount = parseFloat(document.getElementById('newDepositAmount').value);
+            const date = document.getElementById('newDepositDate').value;
+            const note = document.getElementById('newDepositNote').value.trim();
+
+            if (!amount || amount <= 0) {
+                showToast("ত্রুটি", "সঠিক জমার পরিমাণ লিখুন।", "error");
+                return;
+            }
+            if (!date) {
+                showToast("ত্রুটি", "জমার তারিখ নির্বাচন করুন।", "error");
+                return;
+            }
+
+            const s = students.find(x => x.id === currentPaymentStudentId);
+            if (!s) return;
+
+            if (!s.deposits) s.deposits = [];
+            s.deposits.push({ amount: amount, date: date, note: note });
+
+            try {
+                await saveStudentToFirebase(s);
+                showToast("জমা সফল", `৳ ${amount} জমা যোগ করা হয়েছে ${s.name}-এর জন্য।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            document.getElementById('payTotalDeposit').innerText = '৳ ' + getTotalDeposit(s);
+            const due = Math.max(0, (s.admissionFee || 0) - getTotalDeposit(s));
+            document.getElementById('payDue').innerText = '৳ ' + due;
+            document.getElementById('newDepositAmount').value = '';
+            document.getElementById('newDepositNote').value = '';
+            renderDepositHistory(s);
+        }
+
+        // ========== DELETE STUDENT ==========
+        function openDeleteStudentModal(studentId) {
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("অনুমতি নেই", "শুধুমাত্র প্রশাসক শিক্ষার্থী মুছে ফেলতে পারেন।", "error");
+                return;
+            }
+
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                showToast("ত্রুটি", "শিক্ষার্থী খুঁজে পাওয়া যায়নি।", "error");
+                return;
+            }
+
+            pendingDeleteStudentId = studentId;
+            document.getElementById('deleteStudentName').innerText = student.name;
+            document.getElementById('deleteStudentId').innerText = student.id;
+            document.getElementById('deleteStudentModal').classList.remove('hidden');
+        }
+
+        function closeDeleteStudentModal() {
+            pendingDeleteStudentId = null;
+            document.getElementById('deleteStudentModal').classList.add('hidden');
+        }
+
+        async function confirmDeleteStudent() {
+            if (!pendingDeleteStudentId) return;
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("অনুমতি নেই", "শুধুমাত্র প্রশাসক শিক্ষার্থী মুছে ফেলতে পারেন।", "error");
+                closeDeleteStudentModal();
+                return;
+            }
+
+            const studentId = pendingDeleteStudentId;
+            const student = students.find(s => s.id === studentId);
+            if (!student) {
+                closeDeleteStudentModal();
+                return;
+            }
+
+            const deletedName = student.name;
+
+            try {
+                await deleteStudentFromFirebase(studentId);
+                showToast("শিক্ষার্থী মুছে ফেলা হয়েছে", `${deletedName} (${studentId})-এর সকল তথ্য সফলভাবে মুছে ফেলা হয়েছে।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase delete ব্যর্থ: " + err.message, "error");
+            }
+
+            if (currentUser && currentUser.role === 'student' && currentUser.studentId === studentId) {
+                currentUser = null;
+                sessionStorage.removeItem('mx_session');
+            }
+
+            closeDeleteStudentModal();
+        }
+
+        // ========== ADMISSION FORM ARCHIVE ==========
+        function renderAdmissionFormsArchive() {
+            const tbody = document.getElementById('admissionFormsTableBody');
+            tbody.innerHTML = '';
+
+            let formsToRender = admissionForms;
+
+            if (currentUser && currentUser.role === 'student') {
+                formsToRender = admissionForms.filter(af => af.studentId === currentUser.studentId);
+                document.getElementById('admissionArchiveSubtitle').innerText = "আপনার অফিসিয়াল ভর্তি ফরম";
+            } else {
+                document.getElementById('admissionArchiveSubtitle').innerText = "মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুল - সংরক্ষিত সকল শিক্ষার্থীর অফিসিয়াল ভর্তি ফরমের তালিকা";
+            }
+
+            if (formsToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center p-6 text-slate-500">কোনো সংরক্ষিত ভর্তি ফরম পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            formsToRender.forEach(af => {
+                const idx = admissionForms.indexOf(af);
+                const student = students.find(s => s.id === af.studentId);
+                const attachmentCount = student && student.attachments ? student.attachments.length : 0;
+                const attachBadge = attachmentCount > 0 
+                    ? `<span class="ml-1 px-1.5 py-0.5 bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 rounded text-[9px] font-bold">${attachmentCount}</span>` 
+                    : '';
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 border-b border-slate-800 transition";
+                tr.innerHTML = `
+                    <td class="p-3">
+                        <span class="font-bold text-amber-400 font-mono">ক্রমিক: ${af.serialNo}</span>
+                        <div class="text-[11px] text-slate-400 font-mono">${af.admissionDate}</div>
+                    </td>
+                    <td class="p-3">
+                        <strong class="text-white block text-sm">${af.nameBn}</strong>
+                        <span class="text-xs text-slate-400 font-mono">${af.nameEn} (${af.studentId})</span>
+                    </td>
+                    <td class="p-3 text-xs text-slate-300">
+                        <div><b>পিতা:</b> ${af.fatherNameBn || af.fatherName || ''}</div>
+                        <div><b>মাতা:</b> ${af.motherNameBn || af.motherName || ''}</div>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <div class="font-mono text-amber-300">${af.phone}</div>
+                        <div class="text-[11px] text-slate-400">${af.permDistrict}</div>
+                    </td>
+                    <td class="p-3 text-center">
+                        <div class="w-10 h-10 rounded bg-slate-900 border border-slate-700 mx-auto overflow-hidden flex items-center justify-center">
+                            ${af.photoUrl ? `<img src="${af.photoUrl}" class="w-full h-full object-cover">` : `<i class="fa-solid fa-user text-slate-600"></i>`}
+                        </div>
+                    </td>
+                    <td class="p-3 text-right">
+                        <div class="flex items-center justify-end gap-1.5">
+                            <button onclick="openPdfByIndex(${idx})" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-xs transition flex items-center gap-1.5 shadow-md">
+                                <i class="fa-solid fa-file-pdf"></i> ভর্তি ফরম
+                            </button>
+                            <button onclick="openViewAttachmentsModal('${af.studentId}')" class="px-2.5 py-1.5 bg-indigo-500/20 hover:bg-indigo-500 text-indigo-300 hover:text-white border border-indigo-500/40 font-bold rounded-lg text-xs transition flex items-center gap-1" title="সংযুক্ত ফাইল">
+                                <i class="fa-solid fa-paperclip"></i>${attachBadge}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openPdfByIndex(idx) {
+            const af = admissionForms[idx];
+            if (af) {
+                renderAndOpenPdfModal(af);
+            } else {
+                showToast("ত্রুটি", "ফাইল খুঁজে পাওয়া যায়নি।", "error");
+            }
+        }
+
+        function viewAdmissionPdfForStudent(studentId) {
+            const form = admissionForms.find(af => af.studentId === studentId);
+            if (form) {
+                renderAndOpenPdfModal(form);
+            } else {
+                showToast("তথ্য পাওয়া যায়নি", "এই শিক্ষার্থীর জন্য ভর্তি ফরম সংরক্ষিত হয়নি।", "warning");
+            }
+        }
+
+        function viewOwnStudentAdmissionPdf() {
+            if (currentUser && currentUser.studentId) {
+                viewAdmissionPdfForStudent(currentUser.studentId);
+            }
+        }
+
+        // ========== ADDRESS SYNC ==========
+        function handleSameAddressToggle() {
+            const isChecked = document.getElementById('sameAddressCheckbox').checked;
+            if (isChecked) syncAddressData();
+        }
+
+        function syncAddressIfChecked() {
+            const isChecked = document.getElementById('sameAddressCheckbox').checked;
+            if (isChecked) syncAddressData();
+        }
+
+        function syncAddressData() {
+            document.getElementById('afPresVill').value = document.getElementById('afPermVill').value;
+            document.getElementById('afPresPost').value = document.getElementById('afPermPost').value;
+            document.getElementById('afPresUpazila').value = document.getElementById('afPermUpazila').value;
+            document.getElementById('afPresDistrict').value = document.getElementById('afPermDistrict').value;
+        }
+
+        // ========== ADMISSION FORM FILL MODAL ==========
+        function openAdmissionFormFillModal() {
+            const phone = document.getElementById('newStudentPhone').value.trim();
+            if (phone) document.getElementById('afPhone').value = toBanglaDigits(phone);
+            
+            document.getElementById('afSerialNo').value = getNextSerialNumber();
+            document.getElementById('afAdmissionDate').value = getTodayBanglaDate();
+            document.getElementById('admissionFillModal').classList.remove('hidden');
+        }
+
+        function closeAdmissionFillModal() {
+            document.getElementById('admissionFillModal').classList.add('hidden');
+        }
+
+        function previewAdmissionPhoto(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            if (file.size > MAX_ATTACHMENT_SIZE) {
+                showToast("সাইজ সীমা অতিক্রম", "ছবিটি ৫ MB-র বেশি।", "error");
+                event.target.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                tempAdmissionPhoto = e.target.result;
+                const preview = document.getElementById('afPhotoPreview');
+                const placeholder = document.getElementById('afPhotoPlaceholder');
+                preview.src = tempAdmissionPhoto;
+                preview.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        async function handleAdmissionFormSubmit(e) {
+            e.preventDefault();
+
+            const studentId = document.getElementById('newStudentId').value.trim() || ("DS-" + Math.floor(100 + Math.random() * 900));
+            const eduVal = document.querySelector('input[name="edu"]:checked')?.value || "SSC";
+            const abroadVal = document.querySelector('input[name="abroad"]:checked')?.value || "না";
+
+            // Upload photo to Cloudinary
+            let photoUrl = tempAdmissionPhoto;
+            if (tempAdmissionPhoto && !tempAdmissionPhoto.startsWith('http')) {
+                try {
+                    showToast("আপলোড হচ্ছে", "ছবি Cloudinary-তে আপলোড করা হচ্ছে...", "info");
+                    photoUrl = await uploadToCloudinary(tempAdmissionPhoto, `${studentId}_admission.jpg`, 'image');
+                } catch(err) {
+                    console.warn('Admission photo upload failed:', err);
+                    showToast("ছবি আপলোড ব্যর্থ", err.message, "warning");
+                }
+            }
+
+            const formData = {
+                serialNo: document.getElementById('afSerialNo').value.trim(),
+                admissionDate: document.getElementById('afAdmissionDate').value,
+                studentId: studentId,
+                nameBn: document.getElementById('afNameBn').value.trim(),
+                nameEn: document.getElementById('afNameEn').value.trim().toUpperCase(),
+                fatherNameBn: document.getElementById('afFatherNameBn').value.trim(),
+                fatherNameEn: document.getElementById('afFatherNameEn').value.trim().toUpperCase(),
+                motherNameBn: document.getElementById('afMotherNameBn').value.trim(),
+                motherNameEn: document.getElementById('afMotherNameEn').value.trim().toUpperCase(),
+                dob: document.getElementById('afDob').value.trim(),
+                bloodGroup: document.getElementById('afBloodGroup').value,
+                permVill: document.getElementById('afPermVill').value.trim(),
+                permPost: document.getElementById('afPermPost').value.trim(),
+                permUpazila: document.getElementById('afPermUpazila').value.trim(),
+                permDistrict: document.getElementById('afPermDistrict').value.trim(),
+                presVill: document.getElementById('afPresVill').value.trim(),
+                presPost: document.getElementById('afPresPost').value.trim(),
+                presUpazila: document.getElementById('afPresUpazila').value.trim(),
+                presDistrict: document.getElementById('afPresDistrict').value.trim(),
+                education: eduVal,
+                job: document.getElementById('afJob').value.trim(),
+                phone: document.getElementById('afPhone').value.trim(),
+                nid: document.getElementById('afNid').value.trim(),
+                passport: document.getElementById('afPassport').value.trim(),
+                abroad: abroadVal,
+                photoUrl: photoUrl
+            };
+
+            try {
+                await saveAdmissionFormToFirebase(formData);
+                showToast("ভর্তি ফরম সংরক্ষিত", "Firebase-এ সফলভাবে save হয়েছে।", "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            closeAdmissionFillModal();
+            setTimeout(() => renderAndOpenPdfModal(formData), 200);
+        }
+
+        // ========== PDF VIEW ==========
+        function renderAndOpenPdfModal(af) {
+            if (!af) return;
+            
+            document.getElementById('pdfSerialNo').innerText = af.serialNo || "----";
+            document.getElementById('pdfAdmissionDate').innerText = af.admissionDate || "--/--/----";
+            document.getElementById('pdfNameBn').innerText = af.nameBn || "";
+            document.getElementById('pdfNameEn').innerText = af.nameEn || "";
+            document.getElementById('pdfFatherNameBn').innerText = af.fatherNameBn || af.fatherName || "";
+            document.getElementById('pdfFatherNameEn').innerText = af.fatherNameEn || "";
+            document.getElementById('pdfMotherNameBn').innerText = af.motherNameBn || af.motherName || "";
+            document.getElementById('pdfMotherNameEn').innerText = af.motherNameEn || "";
+            document.getElementById('pdfDob').innerText = af.dob || "দিন / মাস / বছর";
+            document.getElementById('pdfBloodGroup').innerText = af.bloodGroup || "";
+            document.getElementById('pdfPermVill').innerText = af.permVill || "";
+            document.getElementById('pdfPermPost').innerText = af.permPost || "";
+            document.getElementById('pdfPermUpazila').innerText = af.permUpazila || "";
+            document.getElementById('pdfPermDistrict').innerText = af.permDistrict || "";
+            document.getElementById('pdfPresVill').innerText = af.presVill || "";
+            document.getElementById('pdfPresPost').innerText = af.presPost || "";
+            document.getElementById('pdfPresUpazila').innerText = af.presUpazila || "";
+            document.getElementById('pdfPresDistrict').innerText = af.presDistrict || "";
+
+            const edu = af.education || "SSC";
+            document.getElementById('boxJsc').innerText = edu === "JSC" ? "☑ JSC" : "☐ JSC";
+            document.getElementById('boxSsc').innerText = edu === "SSC" ? "☑ SSC" : "☐ SSC";
+            document.getElementById('boxHsc').innerText = edu === "HSC" ? "☑ HSC" : "☐ HSC";
+            document.getElementById('boxHons').innerText = edu === "Hon's+" ? "☑ Hon's+" : "☐ Hon's+";
+
+            document.getElementById('pdfJob').innerText = af.job || "";
+            document.getElementById('pdfPhone').innerText = af.phone || "";
+            document.getElementById('pdfNid').innerText = af.nid || "";
+            document.getElementById('pdfPassport').innerText = af.passport || "";
+
+            const abroad = af.abroad || "না";
+            document.getElementById('boxAbroadYes').innerText = abroad === "হ্যাঁ" ? "☑ হ্যাঁ" : "☐ হ্যাঁ";
+            document.getElementById('boxAbroadNo').innerText = abroad === "না" ? "☑ না" : "☐ না";
+
+            const pdfPhotoImg = document.getElementById('pdfPhotoImg');
+            const pdfPhotoText = document.getElementById('pdfPhotoText');
+            if (af.photoUrl) {
+                pdfPhotoImg.src = af.photoUrl;
+                pdfPhotoImg.classList.remove('hidden');
+                pdfPhotoText.classList.add('hidden');
+            } else {
+                pdfPhotoImg.classList.add('hidden');
+                pdfPhotoText.classList.remove('hidden');
+            }
+
+            document.getElementById('admissionPdfViewModal').classList.remove('hidden');
+        }
+
+        function closeAdmissionPdfModal() {
+            document.getElementById('admissionPdfViewModal').classList.add('hidden');
+        }
+
+        // ========== ADD STUDENT ==========
+        function openAddStudentModal() {
+            tempNewStudentPhoto = "";
+            document.getElementById('newStudentPhotoPreview').classList.add('hidden');
+            document.getElementById('newStudentPhotoIcon').classList.remove('hidden');
+            document.getElementById('newStudentPhotoInput').value = '';
+            
+            tempAttachments = [];
+            pendingAttachmentStudentId = null;
+            updateAttachmentBtnState(0);
+
+            document.getElementById('addStudentModal').classList.remove('hidden');
+        }
+
+        function closeAddStudentModal() {
+            document.getElementById('addStudentModal').classList.add('hidden');
+        }
+
+        async function handleAddStudentSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('newStudentName').value.trim();
+            const id = document.getElementById('newStudentId').value.trim();
+            const phone = document.getElementById('newStudentPhone').value.trim();
+            const quota = parseInt(document.getElementById('newStudentQuota').value) || 28;
+            const fee = parseFloat(document.getElementById('newStudentFee').value) || 0;
+            const initialDeposit = parseFloat(document.getElementById('newStudentDeposit').value) || 0;
+            const username = document.getElementById('newStudentUsername').value.trim();
+            const password = document.getElementById('newStudentPassword').value.trim();
+
+            if (students.some(s => s.id === id)) {
+                showToast("ত্রুটি", "এই শিক্ষার্থী আইডি ইতোমধ্যে নিবন্ধিত!", "error");
+                return;
+            }
+
+            const deposits = [];
+            if (initialDeposit > 0) {
+                deposits.push({
+                    amount: initialDeposit,
+                    date: new Date().toISOString().slice(0, 10),
+                    note: "Initial Deposit"
+                });
+            }
+
+            // Upload photo to Cloudinary
+            let photoUrl = "";
+            if (tempNewStudentPhoto) {
+                try {
+                    showToast("আপলোড হচ্ছে", "ছবি Cloudinary-তে আপলোড হচ্ছে...", "info");
+                    photoUrl = await uploadToCloudinary(tempNewStudentPhoto, `${id}_photo.jpg`, 'image');
+                } catch(err) {
+                    console.warn('Photo upload failed, using base64:', err);
+                    photoUrl = tempNewStudentPhoto;
+                    showToast("ছবি আপলোড ব্যর্থ", "Cloudinary config চেক করুন। base64 হিসেবে সংরক্ষণ করা হচ্ছে।", "warning");
+                }
+            }
+
+            // Upload attachments to Cloudinary
+            const attachments = [];
+            for (let i = 0; i < tempAttachments.length; i++) {
+                const att = tempAttachments[i];
+                try {
+                    const url = await uploadToCloudinary(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name));
+                    attachments.push({
+                        name: att.name,
+                        size: att.size,
+                        type: att.type,
+                        url: url,
+                        dataUrl: url,
+                        uploadedAt: att.uploadedAt
+                    });
+                } catch(err) {
+                    console.warn('Attachment upload failed:', err);
+                    attachments.push(att);
+                }
+            }
+
+            const newStudent = {
+                id, name, phone, username, password,
+                course: `কার ড্রাইভিং (${quota} ক্লাস)`,
+                totalQuota: quota,
+                completedCount: 0,
+                lastClassDate: "-",
+                admissionFee: fee,
+                deposits: deposits,
+                photoUrl: photoUrl,
+                attachments: attachments,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await saveStudentToFirebase(newStudent);
+                showToast("শিক্ষার্থী নিবন্ধিত", `${name} সফলভাবে নিবন্ধিত হয়েছেন।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            tempAttachments = [];
+            pendingAttachmentStudentId = null;
+            savedAttachmentsSnapshot = [];
+            tempNewStudentPhoto = "";
+
+            closeAddStudentModal();
+        }
+
+        function startVerifyForStudent(studentId) {
+            switchView('verify');
+            const select = document.getElementById('verifyStudentSelect');
+            select.value = studentId;
+            onVerifyStudentChange();
+        }
+
+        function filterStudentList() {
+            const query = document.getElementById('studentSearchInput').value.toLowerCase();
+            const rows = document.getElementById('studentTableBody').getElementsByTagName('tr');
+            for (let row of rows) {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(query) ? "" : "none";
+            }
+        }
+
+        function populateStudentDropdowns() {
+            const vSelect = document.getElementById('verifyStudentSelect');
+            const logSelect = document.getElementById('logStudentFilter');
+
+            if (!vSelect || !logSelect) return;
+
+            vSelect.innerHTML = '<option value="">-- শিক্ষার্থী নির্বাচন করুন --</option>';
+            logSelect.innerHTML = '<option value="">-- সকল শিক্ষার্থী --</option>';
+
+            students.forEach(s => {
+                const opt1 = document.createElement('option');
+                opt1.value = s.id;
+                opt1.innerText = `${s.id} - ${s.name} (${s.completedCount || 0}/২৮ ক্লাস সম্পন্ন)`;
+                vSelect.appendChild(opt1);
+
+                const opt2 = document.createElement('option');
+                opt2.value = s.id;
+                opt2.innerText = `${s.name} (${s.id})`;
+                logSelect.appendChild(opt2);
+            });
+        }
+
+        function onVerifyStudentChange() {
+            const sId = document.getElementById('verifyStudentSelect').value;
+            const card = document.getElementById('verifyStudentProgress');
+            if (!sId) {
+                card.classList.add('hidden');
+                return;
+            }
+            const student = students.find(s => s.id === sId);
+            if (student) {
+                card.classList.remove('hidden');
+                const completed = student.completedCount || 0;
+                const quota = student.totalQuota || DEFAULT_TOTAL_QUOTA;
+                const percent = Math.min(100, Math.round((completed / quota) * 100));
+                document.getElementById('vClassProgressText').innerText = `${completed} / ${quota} ক্লাস (বাকি: ${quota - completed}টি)`;
+                document.getElementById('vProgressBar').style.width = `${percent}%`;
+            }
+        }
+
+        // ========== LOGIN ==========
+        function showLoginModal(role) {
+            document.getElementById('loginRoleType').value = role;
+            const title = document.getElementById('loginModalTitle');
+            const help = document.getElementById('loginHelpText');
+            document.getElementById('loginUsername').value = '';
+            document.getElementById('loginPassword').value = '';
+
+            if (role === 'admin') {
+                title.innerHTML = `<i class="fa-solid fa-user-shield text-amber-400"></i> প্রশাসনিক লগইন`;
+                help.innerHTML = `<i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> কর্তৃপক্ষের প্রদত্ত ক্রেডেনশিয়াল দিয়ে প্রবেশ করুন।`;
+            } else {
+                title.innerHTML = `<i class="fa-solid fa-user-graduate text-indigo-400"></i> শিক্ষার্থী লগইন`;
+                help.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> আপনার নিবন্ধিত ইউজারনেম ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।`;
+            }
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function handleLoginSubmit(e) {
+            e.preventDefault();
+            const role = document.getElementById('loginRoleType').value;
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value.trim();
+
+            if (role === 'admin') {
+                if (username === adminCredentials.username && password === adminCredentials.password) {
+                    currentUser = { role: 'admin', studentId: null };
+                    sessionStorage.setItem('mx_session', JSON.stringify(currentUser));
+                    closeLoginModal();
+                    showToast("লগইন সফল", "মাইক্রোম্যাক্স মোটর ড্রাইভিং স্কুলের প্রশাসনিক প্যানেলে স্বাগতম।", "success");
+                    applyLoginStateUI();
+                } else {
+                    showToast("লগইন ব্যর্থ", "ভুল ইউজারনেম অথবা পাসওয়ার্ড।", "error");
+                }
+            } else {
+                const student = students.find(s => s.username === username && s.password === password);
+                if (student) {
+                    currentUser = { role: 'student', studentId: student.id };
+                    sessionStorage.setItem('mx_session', JSON.stringify(currentUser));
+                    closeLoginModal();
+                    showToast("লগইন সফল", `স্বাগতম ${student.name}!`, "success");
+                    applyLoginStateUI();
+                } else {
+                    showToast("লগইন ব্যর্থ", "ভুল ইউজারনেম অথবা পাসওয়ার্ড।", "error");
+                }
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            sessionStorage.removeItem('mx_session');
+            showHomeLanding();
+            showToast("লগআউট সম্পন্ন", "সেশন সফলভাবে বন্ধ হয়েছে।", "info");
+        }
+
+        // ========== CREDENTIALS ==========
+        function openCredentialModal() {
+            if (!currentUser) return;
+
+            const isAdmin = currentUser.role === 'admin';
+
+            document.getElementById('credModalTitle').innerText = isAdmin ? 'ক্রেডেনশিয়াল পরিবর্তন' : 'পাসওয়ার্ড পরিবর্তন';
+            document.getElementById('oldPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+            document.getElementById('newUsername').value = '';
+
+            if (isAdmin) {
+                document.getElementById('newUsernameSection').classList.remove('hidden');
+                document.getElementById('newUsername').required = false;
+            } else {
+                document.getElementById('newUsernameSection').classList.add('hidden');
+                document.getElementById('newUsername').required = false;
+            }
+
+            document.getElementById('credentialModal').classList.remove('hidden');
+        }
+
+        function closeCredentialModal() {
+            document.getElementById('credentialModal').classList.add('hidden');
+        }
+
+        async function handleCredentialSubmit(e) {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const oldPass = document.getElementById('oldPassword').value.trim();
+            const newPass = document.getElementById('newPassword').value.trim();
+            const confirmPass = document.getElementById('confirmPassword').value.trim();
+            const newUsername = document.getElementById('newUsername').value.trim();
+
+            if (currentUser.role === 'admin') {
+                if (adminCredentials.password !== oldPass) {
+                    showToast("ত্রুটি", "বর্তমান পাসওয়ার্ড সঠিক নয়।", "error");
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    showToast("ত্রুটি", "নতুন পাসওয়ার্ড দুটি মিলছে না।", "error");
+                    return;
+                }
+                if (newPass.length < 3) {
+                    showToast("ত্রুটি", "পাসওয়ার্ড অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                    return;
+                }
+
+                const updated = { ...adminCredentials, password: newPass };
+                if (newUsername.length > 0) {
+                    if (newUsername.length < 3) {
+                        showToast("ত্রুটি", "ইউজারনেম অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                        return;
+                    }
+                    updated.username = newUsername;
+                }
+
+                try {
+                    await saveAdminCredentialsToFirebase(updated);
+                    showToast("আপডেট সফল", `নতুন ইউজারনেম: ${updated.username}`, "success");
+                } catch(err) {
+                    showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                    return;
+                }
+
+                closeCredentialModal();
+            } else {
+                const student = students.find(s => s.id === currentUser.studentId);
+                if (!student) return;
+
+                if (student.password !== oldPass) {
+                    showToast("ত্রুটি", "বর্তমান পাসওয়ার্ড সঠিক নয়।", "error");
+                    return;
+                }
+                if (newPass !== confirmPass) {
+                    showToast("ত্রুটি", "নতুন পাসওয়ার্ড দুটি মিলছে না।", "error");
+                    return;
+                }
+                if (newPass.length < 3) {
+                    showToast("ত্রুটি", "পাসওয়ার্ড অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                    return;
+                }
+
+                student.password = newPass;
+                try {
+                    await saveStudentToFirebase(student);
+                    showToast("পাসওয়ার্ড আপডেট সফল", "আপনার পাসওয়ার্ড সফলভাবে পরিবর্তিত হয়েছে।", "success");
+                } catch(err) {
+                    showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                    return;
+                }
+                closeCredentialModal();
+            }
+        }
+
+        // ========== SIGNATURE CANVAS ==========
+        function initSignatureCanvas() {
+            sigCanvas = document.getElementById('sigCanvas');
+            if (!sigCanvas) return;
+            sigCtx = sigCanvas.getContext('2d');
+            resizeCanvas();
+
+            sigCanvas.addEventListener('mousedown', startSigning);
+            sigCanvas.addEventListener('mousemove', drawSigning);
+            sigCanvas.addEventListener('mouseup', stopSigning);
+            sigCanvas.addEventListener('mouseleave', stopSigning);
+
+            sigCanvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousedown', { clientX: touch.clientX, clientY: touch.clientY });
+                sigCanvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            sigCanvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                const touch = e.touches[0];
+                const mouseEvent = new MouseEvent('mousemove', { clientX: touch.clientX, clientY: touch.clientY });
+                sigCanvas.dispatchEvent(mouseEvent);
+            }, { passive: false });
+
+            sigCanvas.addEventListener('touchend', () => {
+                const mouseEvent = new MouseEvent('mouseup', {});
+                sigCanvas.dispatchEvent(mouseEvent);
+            });
+        }
+
+        function resizeCanvas() {
+            if (!sigCanvas) return;
+            const rect = sigCanvas.getBoundingClientRect();
+            sigCanvas.width = rect.width || 400;
+            sigCanvas.height = rect.height || 130;
+            sigCtx.lineWidth = 3;
+            sigCtx.lineCap = 'round';
+            sigCtx.strokeStyle = '#020617';
+        }
+
+        function startSigning(e) {
+            isSigning = true;
+            sigCtx.beginPath();
+            const rect = sigCanvas.getBoundingClientRect();
+            sigCtx.moveTo(e.clientX - rect.left, e.clientY - rect.top);
+        }
+
+        function drawSigning(e) {
+            if (!isSigning) return;
+            const rect = sigCanvas.getBoundingClientRect();
+            sigCtx.lineTo(e.clientX - rect.left, e.clientY - rect.top);
+            sigCtx.stroke();
+        }
+
+        function stopSigning() { isSigning = false; }
+        function clearSignature() { if (sigCtx) sigCtx.clearRect(0, 0, sigCanvas.width, sigCanvas.height); }
+
+        function isCanvasBlank(canvas) {
+            const context = canvas.getContext('2d');
+            const pixelBuffer = new Uint32Array(
+                context.getImageData(0, 0, canvas.width, canvas.height).data.buffer
+            );
+            return !pixelBuffer.some(color => color !== 0);
+        }
+
+        // ========== CAMERA ==========
+        async function startCamera() {
+            const video = document.getElementById('videoElement');
+            const placeholder = document.getElementById('cameraPlaceholder');
+            const snapBtn = document.getElementById('snapBtn');
+            try {
+                videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                video.srcObject = videoStream;
+                video.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                snapBtn.classList.remove('hidden');
+                document.getElementById('capturedPhotoPreview').classList.add('hidden');
+            } catch (err) {
+                showToast("ক্যামেরা চালু করা যায়নি", "ক্যামেরার অনুমতি প্রদান করুন।", "error");
+            }
+        }
+
+        function takeSnapshot() {
+            const video = document.getElementById('videoElement');
+            const canvas = document.getElementById('photoCanvas');
+            const preview = document.getElementById('capturedPhotoPreview');
+            canvas.width = video.videoWidth || 320;
+            canvas.height = video.videoHeight || 240;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            capturedPhotoData = canvas.toDataURL('image/jpeg');
+            preview.src = capturedPhotoData;
+            preview.classList.remove('hidden');
+            video.classList.add('hidden');
+            document.getElementById('snapBtn').classList.add('hidden');
+            document.getElementById('retakeBtn').classList.remove('hidden');
+            stopCameraStream();
+        }
+
+        function retakePhoto() {
+            capturedPhotoData = null;
+            document.getElementById('capturedPhotoPreview').classList.add('hidden');
+            document.getElementById('retakeBtn').classList.add('hidden');
+            startCamera();
+        }
+
+        function stopCameraStream() {
+            if (videoStream) {
+                videoStream.getTracks().forEach(track => track.stop());
+                videoStream = null;
+            }
+        }
+
+        // ========== VERIFICATION ==========
+        async function handleVerificationSubmit(e) {
+            e.preventDefault();
+            const studentId = document.getElementById('verifyStudentSelect').value;
+            const lessonDateTime = document.getElementById('lessonDateTime').value;
+            const vehicleRegNo = document.getElementById('vehicleRegNo').value.trim();
+            const instructorName = document.getElementById('instructorName').value.trim();
+            const lessonTopic = document.getElementById('lessonTopic').value;
+            const userOtp = document.getElementById('userOtpInput').value.trim();
+
+            if (!studentId) {
+                showToast("ত্রুটি", "শিক্ষার্থী নির্বাচন করুন।", "error");
+                return;
+            }
+
+            const student = students.find(s => s.id === studentId);
+            if (!student) return;
+
+            let isOtpValid = (userOtp === currentOtp);
+            let hasSignature = !isCanvasBlank(sigCanvas);
+            let hasPhoto = !!capturedPhotoData;
+
+            if (currentUser && currentUser.role === 'admin') {
+                if (!hasSignature || !hasPhoto) {
+                    showToast("বাধ্যতামূলক তথ্য", "প্রশাসনিক প্যানেল থেকে ক্লাস সম্পন্ন করতে শিক্ষার্থীর ছবি এবং ডিজিটাল স্বাক্ষর উভয়ই প্রয়োজন।", "error");
+                    return;
+                }
+            } else {
+                if (!isOtpValid && (!hasSignature || !hasPhoto)) {
+                    showToast("যাচাইকরণ ব্যর্থ", "সঠিক OTP প্রদান করুন অথবা ছবি ও স্বাক্ষর যুক্ত করুন।", "error");
+                    return;
+                }
+            }
+
+            showToast("আপলোড হচ্ছে", "প্রমাণ Cloudinary-তে আপলোড করা হচ্ছে...", "info");
+
+            let signatureUrl = null;
+            let photoUrl = null;
+
+            if (hasSignature) {
+                try {
+                    signatureUrl = await uploadToCloudinary(sigCanvas.toDataURL(), `${studentId}_signature.png`, 'image');
+                } catch(err) {
+                    console.warn('Signature upload failed, using base64');
+                    signatureUrl = sigCanvas.toDataURL();
+                }
+            }
+            if (hasPhoto) {
+                try {
+                    photoUrl = await uploadToCloudinary(capturedPhotoData, `${studentId}_class_photo.jpg`, 'image');
+                } catch(err) {
+                    console.warn('Photo upload failed, using base64');
+                    photoUrl = capturedPhotoData;
+                }
+            }
+
+            const updatedStudent = {
+                ...student,
+                completedCount: (student.completedCount || 0) + 1,
+                lastClassDate: lessonDateTime.slice(0, 10)
+            };
+
+            const logEntry = {
+                verifyId: "MX-VRF-" + Math.floor(10000 + Math.random() * 90000),
+                studentId: student.id,
+                studentName: student.name,
+                dateTime: lessonDateTime,
+                vehicleRegNo: vehicleRegNo,
+                instructorName: instructorName,
+                lessonTopic: lessonTopic,
+                signatureData: signatureUrl,
+                photoData: photoUrl,
+                verifiedBy: currentUser ? currentUser.role : 'admin',
+                completedIndex: updatedStudent.completedCount,
+                totalQuota: student.totalQuota || DEFAULT_TOTAL_QUOTA,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await saveStudentToFirebase(updatedStudent);
+                await saveClassLogToFirebase(logEntry);
+                showToast("ভেরিফিকেশন সফল", `${student.name}-এর ${updatedStudent.completedCount}-তম ক্লাস ভেরিফাই হয়েছে।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            clearSignature();
+            capturedPhotoData = null;
+            document.getElementById('capturedPhotoPreview').classList.add('hidden');
+            document.getElementById('cameraPlaceholder').classList.remove('hidden');
+            document.getElementById('retakeBtn').classList.add('hidden');
+            document.getElementById('userOtpInput').value = '';
+
+            generateNewOtp();
+            openProofModal(logEntry);
+        }
+
+        function openProofModal(log) {
+            document.getElementById('slipStudentName').innerText = log.studentName;
+            document.getElementById('slipStudentId').innerText = log.studentId;
+            document.getElementById('slipDateTime').innerText = (log.dateTime || '').replace('T', ' ');
+            document.getElementById('slipVehicleReg').innerText = log.vehicleRegNo;
+            document.getElementById('slipLessonTopic').innerText = log.lessonTopic;
+            document.getElementById('slipInstructor').innerText = log.instructorName;
+
+            const remaining = Math.max(0, log.totalQuota - log.completedIndex);
+            document.getElementById('slipClassBalanceText').innerText = `${log.totalQuota}টি ক্লাসের মধ্যে ${log.completedIndex}টি সম্পন্ন`;
+            document.getElementById('slipRemainingText').innerText = `${remaining}টি বাকি`;
+
+            const sigImg = document.getElementById('slipSignatureImg');
+            if (log.signatureData) {
+                sigImg.src = log.signatureData;
+                sigImg.classList.remove('hidden');
+            } else {
+                sigImg.classList.add('hidden');
+            }
+
+            const photoImg = document.getElementById('slipPhotoImg');
+            if (log.photoData) {
+                photoImg.src = log.photoData;
+                photoImg.classList.remove('hidden');
+            } else {
+                photoImg.classList.add('hidden');
+            }
+
+            document.getElementById('slipVerifyId').innerText = log.verifyId;
+            document.getElementById('proofSlipModal').classList.remove('hidden');
+        }
+
+        function closeProofModal() {
+            document.getElementById('proofSlipModal').classList.add('hidden');
+        }
+
+        function renderAuditLogsTable() {
+            const tbody = document.getElementById('auditLogsTableBody');
+            tbody.innerHTML = '';
+            let logsToRender = classLogs;
+
+            if (currentUser && currentUser.role === 'student') {
+                logsToRender = classLogs.filter(l => l.studentId === currentUser.studentId);
+                document.getElementById('logFilterContainer').classList.add('hidden');
+            } else {
+                document.getElementById('logFilterContainer').classList.remove('hidden');
+                const selectedFilter = document.getElementById('logStudentFilter').value;
+                if (selectedFilter) logsToRender = classLogs.filter(l => l.studentId === selectedFilter);
+            }
+
+            if (logsToRender.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="text-center p-6 text-slate-500">কোনো ডিজিটাল ক্লাস রেকর্ড পাওয়া যায়নি।</td></tr>`;
+                return;
+            }
+
+            logsToRender.forEach((log, idx) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-800/40 border-b border-slate-800 transition";
+                tr.innerHTML = `
+                    <td class="p-3 font-mono text-xs text-amber-300">${(log.dateTime || '').replace('T', ' ')}</td>
+                    <td class="p-3">
+                        <strong class="text-white block text-xs">${log.studentName}</strong>
+                        <span class="text-[10px] text-slate-400 font-mono">${log.studentId} (${log.completedIndex}/${log.totalQuota} ক্লাস)</span>
+                    </td>
+                    <td class="p-3 text-xs">
+                        <div class="text-slate-200 font-medium">${log.lessonTopic}</div>
+                        <div class="text-[10px] text-slate-500 font-mono">${log.vehicleRegNo}</div>
+                    </td>
+                    <td class="p-3 text-xs text-slate-300">${log.instructorName}</td>
+                    <td class="p-3">
+                        ${log.signatureData ? `<img src="${log.signatureData}" class="h-8 bg-white px-1 rounded border border-slate-600">` : `<span class="text-[10px] text-slate-500">OTP ভেরিফাইড</span>`}
+                    </td>
+                    <td class="p-3">
+                        ${log.photoData ? `<img src="${log.photoData}" class="h-9 w-9 rounded object-cover border border-slate-700">` : `<span class="text-[10px] text-slate-500">নাই</span>`}
+                    </td>
+                    <td class="p-3 text-right">
+                        <button onclick="openProofModalByIndex(${idx})" class="px-2.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/30 font-bold rounded-lg text-xs hover:bg-amber-500 hover:text-slate-950 transition">
+                            <i class="fa-solid fa-receipt mr-1"></i> রেকর্ড
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function openProofModalByIndex(idx) {
+            let log;
+            if (currentUser && currentUser.role === 'student') {
+                const filtered = classLogs.filter(l => l.studentId === currentUser.studentId);
+                log = filtered[idx];
+            } else {
+                log = classLogs[idx];
+            }
+            if (log) openProofModal(log);
+        }
+
+        function filterAuditLogs() {
+            renderAuditLogsTable();
+        }
+
+        // ========== TOAST ==========
+        function showToast(title, message, type = 'info') {
+            const toast = document.getElementById('toast');
+            const icon = document.getElementById('toastIcon');
+            document.getElementById('toastTitle').innerText = title;
+            document.getElementById('toastMessage').innerText = message;
+
+            if (type === 'success') {
+                icon.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400"></i>`;
+            } else if (type === 'error') {
+                icon.innerHTML = `<i class="fa-solid fa-circle-xmark text-rose-400"></i>`;
+            } else if (type === 'warning') {
+                icon.innerHTML = `<i class="fa-solid fa-triangle-exclamation text-amber-400"></i>`;
+            } else {
+                icon.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400"></i>`;
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(hideToast, 4000);
+        }
+
+        function hideToast() {
+            document.getElementById('toast').classList.add('translate-y-20', 'opacity-0');
+        }
+    </script>
+</body>
+</html>
