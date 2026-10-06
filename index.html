@@ -109,25 +109,17 @@
         }
 
         /* ==================== MOBILE-ONLY ENHANCEMENTS ==================== */
-        /* These styles ONLY affect mobile — desktop unchanged */
-        
         @media (max-width: 640px) {
-            /* Prevent iOS zoom on input focus */
             input, select, textarea { font-size: 16px !important; }
-            
-            /* Touch tap highlight removal */
             * { -webkit-tap-highlight-color: transparent; }
 
-            /* Header compact */
             #appHeader .max-w-7xl { padding-left: 8px; padding-right: 8px; }
             #appHeader .h-16 { height: 56px; }
             
-            /* Logo smaller */
             #appHeader .w-10 { width: 36px; height: 36px; font-size: 16px; }
             #appHeader h1 { font-size: 13px; }
             #appHeader #roleBadge { font-size: 9px; padding: 1px 6px; }
             
-            /* Nav becomes horizontal scroll */
             #appHeader nav {
                 position: fixed;
                 bottom: 0;
@@ -141,7 +133,7 @@
                 border-right: none;
                 border-bottom: none;
                 padding: 8px;
-                z-index: 50;
+                z-index: 60;
                 overflow-x: auto;
                 flex-wrap: nowrap;
                 gap: 4px;
@@ -151,6 +143,7 @@
                 flex-shrink: 0;
                 font-size: 10px;
                 padding: 6px 10px !important;
+                cursor: pointer;
             }
             #appHeader nav button i {
                 display: block;
@@ -158,10 +151,8 @@
                 margin: 0 0 2px 0 !important;
             }
             
-            /* Add bottom padding to body for fixed nav */
             body { padding-bottom: 70px; }
 
-            /* Header actions compact */
             #appHeader .border-l { padding-left: 6px; }
             #appHeader #btnChangePassword, #appHeader #notifBtn, #appHeader button[onclick="logout()"] {
                 padding: 6px 8px !important;
@@ -172,10 +163,8 @@
                 display: none;
             }
 
-            /* Main padding */
             main { padding: 12px 8px; }
 
-            /* Summary cards 2 columns */
             #adminSummaryCards { grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
             #adminSummaryCards > div { padding: 10px !important; }
             #adminSummaryCards h3 { font-size: 18px !important; }
@@ -183,12 +172,10 @@
             #adminSummaryCards span { font-size: 9px !important; }
             #adminSummaryCards .w-12 { width: 32px !important; height: 32px !important; font-size: 14px !important; }
 
-            /* Student Personal Card */
             #studentPersonalCard { padding: 14px !important; }
             #spAvatarContainer { width: 44px !important; height: 44px !important; font-size: 18px; }
             #spStudentName { font-size: 15px !important; }
 
-            /* Table becomes card */
             table.w-full thead { display: none; }
             table.w-full tbody tr {
                 display: block;
@@ -228,56 +215,46 @@
                 margin: 0 auto;
             }
 
-            /* Modals mobile - allow scroll */
             .fixed.inset-0.z-50 > div {
                 max-height: 92vh;
                 margin: 8px;
                 padding: 16px !important;
             }
 
-            /* Verification form tighter */
             #verificationForm .p-6 { padding: 14px !important; }
             #verificationForm .space-y-6 > * + * { margin-top: 16px !important; }
 
-            /* Camera area */
             #cameraArea { min-height: 140px; }
             #cameraArea video, #cameraArea img { max-height: 200px; }
 
-            /* Signature canvas */
             #sigCanvas { height: 110px !important; }
-
-            /* OTP display */
             #otpCodeDisplay { font-size: 14px !important; }
 
-            /* PDF A4 preview - responsive */
             .pdf-paper { min-height: auto !important; padding: 20px !important; }
             .pdf-paper h2 { font-size: 16px !important; }
             .pdf-paper .text-xs { font-size: 10px !important; }
 
-            /* Search input full width */
             #adminSearchBox { width: 100% !important; }
             #adminSearchBox input { width: 100% !important; }
 
-            /* Table header toolbar stack */
             .p-5.border-b.flex { padding: 12px !important; }
 
-            /* Pagination stack */
             #paginationContainer { flex-direction: column; gap: 10px; }
 
-            /* Toast full width */
             #toast { left: 8px !important; right: 8px !important; bottom: 80px !important; max-width: none !important; }
         }
 
-        /* Tablet adjustments */
         @media (min-width: 641px) and (max-width: 1024px) {
             #adminSummaryCards { grid-template-columns: repeat(2, 1fr) !important; }
         }
 
-        /* Better scrollbar for modals */
         .modal-scroll { overflow-y: auto; -webkit-overflow-scrolling: touch; }
-
-        /* Prevent body scroll when modal open */
         body.modal-open { overflow: hidden; }
+
+        .password-reset-banner {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
+            border: 1px solid rgba(251, 191, 36, 0.4);
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-full flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
@@ -307,16 +284,16 @@
 
                 <div class="flex items-center space-x-3">
                     <nav class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm">
-                        <button id="navDashboardBtn" onclick="switchView('dashboard')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg transition bg-amber-500 text-slate-950 shadow-md">
+                        <button type="button" data-view="dashboard" class="nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg transition bg-amber-500 text-slate-950 shadow-md">
                             <i class="fa-solid fa-gauge-high mr-1"></i> ড্যাশবোর্ড
                         </button>
-                        <button id="navAdmissionFormsBtn" onclick="switchView('admission_forms')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                        <button type="button" data-view="admission_forms" class="nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
                             <i class="fa-solid fa-file-pdf mr-1 text-amber-400"></i> ভর্তি ফরম
                         </button>
-                        <button id="navVerifyBtn" onclick="switchView('verify')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                        <button type="button" data-view="verify" class="nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
                             <i class="fa-solid fa-file-signature mr-1"></i> ক্লাস ভেরিফিকেশন
                         </button>
-                        <button id="navLogsBtn" onclick="switchView('logs')" class="px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
+                        <button type="button" data-view="logs" class="nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition">
                             <i class="fa-solid fa-clock-rotate-left mr-1"></i> অডিট লগ
                         </button>
                     </nav>
@@ -528,7 +505,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div id="paginationContainer" class="p-4 border-t border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
                     <div class="flex items-center space-x-2 text-xs text-slate-400">
                         <span>প্রতি পেজে:</span>
@@ -767,6 +743,50 @@
 
     </main>
 
+    <!-- MODAL: SECRET SETUP (First Time Login) -->
+    <div id="secretSetupModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[100] flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-amber-500/40 shadow-2xl space-y-4">
+            <div class="flex items-center gap-3 border-b border-slate-700 pb-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-user-secret"></i>
+                </div>
+                <h3 class="font-bold text-base text-white">প্রথমবার লগইন - Secret Word সেট করুন</h3>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> কেন Secret Word দরকার?</p>
+                <p class="text-[11px] text-amber-300">ভবিষ্যতে পাসওয়ার্ড ভুলে গেলে আপনার ইউজারনেম + এই Secret Word দিয়ে পাসওয়ার্ড রিসেটের রিকোয়েস্ট পাঠাতে পারবেন। এটি গোপন রাখুন।</p>
+            </div>
+
+            <form onsubmit="handleSecretSetupSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">আপনার ইউজারনেম</label>
+                    <input type="text" id="secretSetupUsername" readonly class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs text-amber-400 font-mono cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">
+                        Secret Word / Number *
+                        <i class="fa-solid fa-eye text-amber-400 ml-1" onclick="toggleSecretVisibility()" style="cursor:pointer;" id="secretToggleIcon"></i>
+                    </label>
+                    <input type="password" id="secretSetupValue" required placeholder="কোনো গোপন শব্দ বা নাম্বার দিন" minlength="3" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-500">
+                    <p class="text-[10px] text-amber-400 mt-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> এই শব্দ/নাম্বার কোথাও লিখে রাখুন। এটি দিয়েই পাসওয়ার্ড রিসেট হবে।</p>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">Secret Word পুনরায় লিখুন *</label>
+                    <input type="password" id="secretSetupConfirm" required placeholder="পুনরায় Secret Word দিন" minlength="3" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition">
+                        <i class="fa-solid fa-check mr-1"></i> Secret Word সেট করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- MODAL: EDIT STUDENT -->
     <div id="editStudentModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print overflow-y-auto">
         <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-slate-700 shadow-2xl space-y-4 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar">
@@ -800,36 +820,64 @@
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">ভর্তি ফি (মোট) *</label>
-                        <input type="number" id="editStudentFee" min="0" required class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-semibold text-slate-400 mb-1">সম্পন্ন ক্লাস সংখ্যা *</label>
-                        <input type="number" id="editStudentCompleted" min="0" required class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
-                    </div>
-                </div>
-
-                <div class="bg-slate-900 p-3 rounded-xl border border-amber-500/30 space-y-3">
-                    <span class="text-xs font-bold text-amber-400 block"><i class="fa-solid fa-key mr-1"></i> শিক্ষার্থীর লগইন অ্যাক্সেস</span>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">ইউজারনেম *</label>
-                            <input type="text" id="editStudentUsername" required class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-400 mb-1">নতুন পাসওয়ার্ড <i class="fa-solid fa-eye text-amber-400 ml-1" onclick="toggleEditPasswordVisibility()" style="cursor:pointer;" id="editPassToggleIcon"></i></label>
-                            <input type="password" id="editStudentPassword" placeholder="খালি রাখলে অপরিবর্তিত থাকবে" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
-                            <p class="text-[10px] text-emerald-400 mt-1"><i class="fa-solid fa-circle-info mr-1"></i> শিক্ষার্থী পাসওয়ার্ড ভুলে গেলে এখান থেকে সেট করুন। খালি রাখলে পুরনো পাসওয়ার্ড থাকবে।</p>
-                        </div>
-                    </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">ভর্তি ফি (মোট) *</label>
+                    <input type="number" id="editStudentFee" min="0" required class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono">
                 </div>
 
                 <div class="pt-2 flex space-x-2">
                     <button type="button" onclick="closeEditStudentModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
                     <button type="submit" class="flex-1 py-2 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs shadow-md">
                         <i class="fa-solid fa-check mr-1"></i> আপডেট করুন
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: RESET STUDENT PASSWORD (from notification) -->
+    <div id="resetPasswordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4 no-print overflow-y-auto">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-amber-500/40 shadow-2xl space-y-4 my-auto">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> শিক্ষার্থীর পাসওয়ার্ড রিসেট
+                </h3>
+                <button onclick="closeResetPasswordModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> পাসওয়ার্ড রিসেট রিকোয়েস্ট</p>
+                <p id="resetPassInfoText" class="text-[11px] text-amber-300">শিক্ষার্থী username + secret word দিয়ে রিকোয়েস্ট পাঠিয়েছেন। নতুন পাসওয়ার্ড সেট করে দিন।</p>
+            </div>
+
+            <form onsubmit="handleResetPasswordSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">শিক্ষার্থীর নাম</label>
+                    <input type="text" id="resetPassStudentName" readonly class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs text-amber-400 font-bold cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">আইডি</label>
+                    <input type="text" id="resetPassStudentId" readonly class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 font-mono cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">ইউজারনেম</label>
+                    <input type="text" id="resetPassUsername" readonly class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-xs text-slate-300 font-mono cursor-not-allowed">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">
+                        নতুন পাসওয়ার্ড *
+                        <i class="fa-solid fa-eye text-amber-400 ml-1" onclick="toggleResetPasswordVisibility()" style="cursor:pointer;" id="resetPassToggleIcon"></i>
+                    </label>
+                    <input type="password" id="resetPassNewPassword" required placeholder="নতুন পাসওয়ার্ড দিন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeResetPasswordModal()" class="flex-1 py-2 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2 rounded-xl bg-amber-500 text-slate-950 font-bold text-xs shadow-md">
+                        <i class="fa-solid fa-check mr-1"></i> পাসওয়ার্ড সেট করুন
                     </button>
                 </div>
             </form>
@@ -938,6 +986,7 @@
                             <input type="text" id="newStudentPassword" required placeholder="পাসওয়ার্ড" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-850 text-xs text-slate-100 font-mono">
                         </div>
                     </div>
+                    <p class="text-[10px] text-amber-400"><i class="fa-solid fa-circle-info mr-1"></i> শিক্ষার্থী প্রথমবার login করার সময় নিজেই একটি Secret Word সেট করবে।</p>
                 </div>
 
                 <div class="pt-1">
@@ -1416,12 +1465,61 @@
                     <label class="block text-xs font-semibold text-slate-400 mb-1">পাসওয়ার্ড *</label>
                     <input type="password" id="loginPassword" required placeholder="আপনার পাসওয়ার্ড লিখুন" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
                 </div>
+                
+                <div id="forgetPasswordSection" class="hidden">
+                    <button type="button" onclick="openForgetPasswordModal()" class="text-xs text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1">
+                        <i class="fa-solid fa-question-circle"></i> পাসওয়ার্ড ভুলে গেছেন?
+                    </button>
+                </div>
+
                 <div id="loginHelpText" class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[11px] text-slate-400">
                     <i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> কর্তৃপক্ষের প্রদত্ত ক্রেডেনশিয়াল দিয়ে প্রবেশ করুন।
                 </div>
                 <div class="pt-2 flex space-x-2">
                     <button type="button" onclick="closeLoginModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
                     <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition">প্রবেশ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: FORGET PASSWORD (with username + secret) -->
+    <div id="forgetPasswordModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 no-print">
+        <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-amber-500/40 shadow-2xl space-y-5">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-amber-400"></i> পাসওয়ার্ড রিসেট রিকোয়েস্ট
+                </h3>
+                <button onclick="closeForgetPasswordModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-xs text-amber-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> কীভাবে কাজ করবে:</p>
+                <ol class="list-decimal list-inside space-y-0.5 text-[11px] text-amber-300">
+                    <li>আপনার নিবন্ধিত ইউজারনেম দিন</li>
+                    <li>আপনার Secret Word / Number দিন</li>
+                    <li>দুটোই সঠিক হলে রিকোয়েস্ট অ্যাডমিনের কাছে যাবে</li>
+                    <li>অ্যাডমিন পাসওয়ার্ড রিসেট করলে অফিস থেকে জানতে পারবেন</li>
+                </ol>
+            </div>
+
+            <form onsubmit="handleForgetPasswordSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">আপনার ইউজারনেম *</label>
+                    <input type="text" id="forgetUsername" required placeholder="আপনার নিবন্ধিত ইউজারনেম" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 focus:outline-none focus:border-amber-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">আপনার Secret Word / Number *</label>
+                    <input type="password" id="forgetSecret" required placeholder="আপনার গোপন শব্দ বা নাম্বার" minlength="3" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-700 bg-slate-900 text-sm text-slate-100 font-mono focus:outline-none focus:border-amber-500">
+                    <p class="text-[10px] text-slate-500 mt-1">প্রথমবার লগইন করার সময় আপনি যেই Secret Word সেট করেছিলেন সেটিই দিন।</p>
+                </div>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeForgetPasswordModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> রিকোয়েস্ট পাঠান
+                    </button>
                 </div>
             </form>
         </div>
@@ -1646,11 +1744,10 @@
     <!-- CLOUDINARY CONFIG — এখানে আপনার তথ্য বসান        -->
     <!-- ================================================ -->
     <script>
-        // ⚠️ IMPORTANT: আপনার Cloudinary তথ্য এখানে বসান
         const CLOUDINARY_CONFIG = {
-            cloudName: 'il1rwddi',         // ← এখানে আপনার Cloud Name বসান
-            uploadPreset: 'mx_driving_school',    // ← এখানে আপনার Upload Preset Name
-            folder: 'mx-school'                   // Optional: Cloudinary-তে folder name
+            cloudName: 'il1rwddi',
+            uploadPreset: 'mx_driving_school',
+            folder: 'mx-school'
         };
     </script>
 
@@ -1676,7 +1773,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Expose Firebase API globally (No storage anymore — using Cloudinary)
         window.FB = {
             db,
             ref, set, get, update, remove, onValue, push, child
@@ -1717,7 +1813,7 @@
         let currentUser = null;
 
         const DEFAULT_TOTAL_QUOTA = 28;
-        const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024; // 5 MB
+        const MAX_ATTACHMENT_SIZE = 5 * 1024 * 1024;
 
         let currentOtp = "";
         let otpTimeRemaining = 30;
@@ -1732,13 +1828,14 @@
         let pendingDeleteStudentId = null;
         let currentPaymentStudentId = null;
         let pendingEditStudentId = null;
+        let pendingResetPasswordStudentId = null;
+        let pendingSecretSetupStudentId = null;
 
         let tempAttachments = [];
         let savedAttachmentsSnapshot = [];
         let pendingAttachmentStudentId = null;
         let currentViewAttachmentsStudentId = null;
 
-        // Pagination state
         let currentPage = 1;
         let pageSize = 25;
         let filteredStudents = [];
@@ -1821,20 +1918,17 @@
             return toBanglaDigits(maxNum + 1);
         }
 
-        // ⭐ NEW: Auto-generate Student ID (DS-001, DS-002, ...)
         function generateNextStudentId() {
             if (!students || students.length === 0) return "DS-001";
             
             let maxNum = 0;
             students.forEach(s => {
                 const idStr = (s.id || '').trim();
-                // Match pattern like "DS-123" or "DS-001" (also handle any prefix like DS)
                 const match = idStr.match(/^[A-Za-z]+-?(\d+)$/);
                 if (match) {
                     const num = parseInt(match[1]);
                     if (!isNaN(num) && num > maxNum) maxNum = num;
                 } else {
-                    // Try to extract any trailing number
                     const trailingMatch = idStr.match(/(\d+)\s*$/);
                     if (trailingMatch) {
                         const num = parseInt(trailingMatch[1]);
@@ -1848,7 +1942,6 @@
             return `DS-${paddedNum}`;
         }
 
-        // ⭐ NEW: Reset Student ID input to auto value
         function resetStudentIdToAuto() {
             const input = document.getElementById('newStudentId');
             if (input) {
@@ -1857,10 +1950,23 @@
             }
         }
 
-        // ⭐ NEW: Toggle password visibility in Edit modal
-        function toggleEditPasswordVisibility() {
-            const input = document.getElementById('editStudentPassword');
-            const icon = document.getElementById('editPassToggleIcon');
+        function toggleResetPasswordVisibility() {
+            const input = document.getElementById('resetPassNewPassword');
+            const icon = document.getElementById('resetPassToggleIcon');
+            if (!input || !icon) return;
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.className = 'fa-solid fa-eye-slash text-amber-400 ml-1';
+            } else {
+                input.type = 'password';
+                icon.className = 'fa-solid fa-eye text-amber-400 ml-1';
+            }
+        }
+
+        function toggleSecretVisibility() {
+            const input = document.getElementById('secretSetupValue');
+            const icon = document.getElementById('secretToggleIcon');
             if (!input || !icon) return;
             
             if (input.type === 'password') {
@@ -1879,7 +1985,7 @@
         }
 
         // ============================================
-        // ⭐ CLOUDINARY UPLOAD FUNCTIONS
+        // CLOUDINARY UPLOAD FUNCTIONS
         // ============================================
         async function uploadToCloudinaryWithStudentFolder(base64Data, filename, resourceType = 'auto', studentId = null) {
             try {
@@ -2105,7 +2211,29 @@
                 if (currentUser) applyLoginStateUI();
                 else showHomeLanding();
             }, 800);
+
+            // Setup nav buttons with event delegation (fixes mobile repeat issue)
+            setupNavButtons();
         });
+
+        // ========== NAV BUTTON SETUP (FIXED for mobile repeat) ==========
+        function setupNavButtons() {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            navButtons.forEach(btn => {
+                // Remove any existing listeners
+                const newBtn = btn.cloneNode(true);
+                btn.parentNode.replaceChild(newBtn, btn);
+                
+                newBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const view = this.getAttribute('data-view');
+                    if (view) {
+                        switchView(view);
+                    }
+                });
+            });
+        }
 
         // ========== OTP ==========
         function startOtpGenerator() {
@@ -2185,32 +2313,35 @@
             const verify = document.getElementById('verifyView');
             const logs = document.getElementById('logsView');
 
-            const btnDash = document.getElementById('navDashboardBtn');
-            const btnAdmission = document.getElementById('navAdmissionFormsBtn');
-            const btnVerify = document.getElementById('navVerifyBtn');
-            const btnLogs = document.getElementById('navLogsBtn');
-
             dash.classList.add('hidden');
             admission.classList.add('hidden');
             verify.classList.add('hidden');
             logs.classList.add('hidden');
 
-            btnDash.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
-            btnAdmission.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
-            btnVerify.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
-            btnLogs.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+            // Reset all nav button styles
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg text-slate-300 hover:text-white transition";
+            });
+
+            let targetSection = null;
 
             if (viewName === 'dashboard') {
                 dash.classList.remove('hidden');
-                btnDash.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                targetSection = dash;
+                const btn = document.querySelector('.nav-btn[data-view="dashboard"]');
+                if (btn) btn.className = "nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
                 renderDashboard();
             } else if (viewName === 'admission_forms') {
                 admission.classList.remove('hidden');
-                btnAdmission.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                targetSection = admission;
+                const btn = document.querySelector('.nav-btn[data-view="admission_forms"]');
+                if (btn) btn.className = "nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
                 renderAdmissionFormsArchive();
             } else if (viewName === 'verify') {
                 verify.classList.remove('hidden');
-                btnVerify.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                targetSection = verify;
+                const btn = document.querySelector('.nav-btn[data-view="verify"]');
+                if (btn) btn.className = "nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
                 const vSelect = document.getElementById('verifyStudentSelect');
                 if (currentUser && currentUser.role === 'student') {
                     vSelect.value = currentUser.studentId;
@@ -2222,8 +2353,15 @@
                 setTimeout(resizeCanvas, 100);
             } else if (viewName === 'logs') {
                 logs.classList.remove('hidden');
-                btnLogs.className = "px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
+                targetSection = logs;
+                const btn = document.querySelector('.nav-btn[data-view="logs"]');
+                if (btn) btn.className = "nav-btn px-3 py-1.5 sm:px-4 sm:py-2 font-semibold rounded-lg bg-amber-500 text-slate-950 shadow-md";
                 renderAuditLogsTable();
+            }
+
+            // Scroll to top on mobile
+            if (window.innerWidth <= 640 && targetSection) {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
 
@@ -2777,6 +2915,66 @@
             reader.readAsDataURL(file);
         }
 
+        // ========== SECRET SETUP (First Time Login) ==========
+        function openSecretSetupModal(studentId) {
+            const s = students.find(x => x.id === studentId);
+            if (!s) return;
+
+            pendingSecretSetupStudentId = studentId;
+            document.getElementById('secretSetupUsername').value = s.username || '';
+            document.getElementById('secretSetupValue').value = '';
+            document.getElementById('secretSetupConfirm').value = '';
+            document.getElementById('secretSetupValue').type = 'password';
+            document.getElementById('secretToggleIcon').className = 'fa-solid fa-eye text-amber-400 ml-1';
+
+            document.getElementById('secretSetupModal').classList.remove('hidden');
+        }
+
+        function closeSecretSetupModal() {
+            pendingSecretSetupStudentId = null;
+            document.getElementById('secretSetupModal').classList.add('hidden');
+        }
+
+        async function handleSecretSetupSubmit(e) {
+            e.preventDefault();
+            if (!pendingSecretSetupStudentId) return;
+
+            const s = students.find(x => x.id === pendingSecretSetupStudentId);
+            if (!s) return;
+
+            const secret = document.getElementById('secretSetupValue').value.trim();
+            const secretConfirm = document.getElementById('secretSetupConfirm').value.trim();
+
+            if (!secret || secret.length < 3) {
+                showToast("ত্রুটি", "Secret Word অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                return;
+            }
+
+            if (secret !== secretConfirm) {
+                showToast("ত্রুটি", "দুটি Secret Word মিলছে না।", "error");
+                return;
+            }
+
+            s.secretWord = secret;
+            s.secretSet = true;
+
+            try {
+                await saveStudentToFirebase(s);
+                showToast("Secret Word সেট সফল", "আপনার Secret Word সফলভাবে সংরক্ষিত হয়েছে।", "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            closeSecretSetupModal();
+
+            // Now proceed with login
+            currentUser = { role: 'student', studentId: s.id };
+            sessionStorage.setItem('mx_session', JSON.stringify(currentUser));
+            showToast("লগইন সফল", `স্বাগতম ${s.name}!`, "success");
+            applyLoginStateUI();
+        }
+
         // ========== EDIT STUDENT ==========
         function openEditStudentModal(studentId) {
             if (!currentUser || currentUser.role !== 'admin') {
@@ -2796,12 +2994,6 @@
             document.getElementById('editStudentPhone').value = s.phone || '';
             document.getElementById('editStudentQuota').value = s.totalQuota || DEFAULT_TOTAL_QUOTA;
             document.getElementById('editStudentFee').value = s.admissionFee || 0;
-            document.getElementById('editStudentCompleted').value = s.completedCount || 0;
-            document.getElementById('editStudentUsername').value = s.username || '';
-            document.getElementById('editStudentPassword').value = '';
-            document.getElementById('editStudentPassword').type = 'password';
-            const icon = document.getElementById('editPassToggleIcon');
-            if (icon) icon.className = 'fa-solid fa-eye text-amber-400 ml-1';
 
             document.getElementById('editStudentModal').classList.remove('hidden');
         }
@@ -2827,11 +3019,8 @@
             const phone = document.getElementById('editStudentPhone').value.trim();
             const quota = parseInt(document.getElementById('editStudentQuota').value) || DEFAULT_TOTAL_QUOTA;
             const fee = parseFloat(document.getElementById('editStudentFee').value) || 0;
-            const completed = parseInt(document.getElementById('editStudentCompleted').value) || 0;
-            const username = document.getElementById('editStudentUsername').value.trim();
-            const newPassword = document.getElementById('editStudentPassword').value.trim();
 
-            if (!name || !phone || !username) {
+            if (!name || !phone) {
                 showToast("ত্রুটি", "সব প্রয়োজনীয় তথ্য পূরণ করুন।", "error");
                 return;
             }
@@ -2840,23 +3029,92 @@
             s.phone = phone;
             s.totalQuota = quota;
             s.admissionFee = fee;
-            s.completedCount = completed;
-            s.username = username;
             s.course = `কার ড্রাইভিং (${quota} ক্লাস)`;
-
-            if (newPassword.length > 0) {
-                s.password = newPassword;
-            }
 
             try {
                 await saveStudentToFirebase(s);
-                showToast("আপডেট সফল", `${name}-এর তথ্য সফলভাবে আপডেট হয়েছে।${quota > (s.completedCount || 0) ? ' শিক্ষার্থী এখন নতুন ক্লাস নিতে পারবেন।' : ''}`, "success");
+                showToast("আপডেট সফল", `${name}-এর তথ্য সফলভাবে আপডেট হয়েছে।`, "success");
             } catch(err) {
                 showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
                 return;
             }
 
             closeEditStudentModal();
+        }
+
+        // ========== RESET PASSWORD (from notification) ==========
+        function openResetPasswordModalFromNotification(notifKey, studentId) {
+            const n = notifications.find(x => x._fbKey === notifKey);
+            if (!n) return;
+
+            const s = students.find(x => x.id === studentId);
+            if (!s) {
+                showToast("ত্রুটি", "শিক্ষার্থী খুঁজে পাওয়া যায়নি।", "error");
+                return;
+            }
+
+            closeNotificationPanel();
+
+            pendingResetPasswordStudentId = studentId;
+            document.getElementById('resetPassStudentName').value = s.name || '';
+            document.getElementById('resetPassStudentId').value = s.id || '';
+            document.getElementById('resetPassUsername').value = s.username || '';
+            document.getElementById('resetPassNewPassword').value = '';
+            document.getElementById('resetPassNewPassword').type = 'password';
+            document.getElementById('resetPassToggleIcon').className = 'fa-solid fa-eye text-amber-400 ml-1';
+
+            document.getElementById('resetPasswordModal').classList.remove('hidden');
+
+            (async () => {
+                try {
+                    await updateNotificationInFirebase(notifKey, {
+                        status: 'dismissed',
+                        dismissedAt: new Date().toISOString()
+                    });
+                } catch(err) {
+                    console.warn('Notification dismiss error:', err);
+                }
+            })();
+        }
+
+        function closeResetPasswordModal() {
+            pendingResetPasswordStudentId = null;
+            document.getElementById('resetPasswordModal').classList.add('hidden');
+        }
+
+        async function handleResetPasswordSubmit(e) {
+            e.preventDefault();
+            if (!currentUser || currentUser.role !== 'admin') {
+                showToast("অনুমতি নেই", "শুধুমাত্র প্রশাসক পাসওয়ার্ড রিসেট করতে পারেন।", "error");
+                return;
+            }
+
+            if (!pendingResetPasswordStudentId) return;
+
+            const s = students.find(x => x.id === pendingResetPasswordStudentId);
+            if (!s) {
+                showToast("ত্রুটি", "শিক্ষার্থী খুঁজে পাওয়া যায়নি।", "error");
+                return;
+            }
+
+            const newPass = document.getElementById('resetPassNewPassword').value.trim();
+
+            if (!newPass || newPass.length < 3) {
+                showToast("ত্রুটি", "পাসওয়ার্ড অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                return;
+            }
+
+            s.password = newPass;
+
+            try {
+                await saveStudentToFirebase(s);
+                showToast("পাসওয়ার্ড সেট সফল", `${s.name}-এর নতুন পাসওয়ার্ড সেট করা হয়েছে। শিক্ষার্থীকে জানিয়ে দিন।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            closeResetPasswordModal();
         }
 
         // ========== FEE & PAYMENT ==========
@@ -3311,7 +3569,6 @@
             pendingAttachmentStudentId = null;
             updateAttachmentBtnState(0);
 
-            // ⭐ Auto-set Student ID serial
             document.getElementById('newStudentId').value = generateNextStudentId();
 
             document.getElementById('addStudentModal').classList.remove('hidden');
@@ -3382,6 +3639,8 @@
 
             const newStudent = {
                 id, name, phone, username, password,
+                secretWord: "",
+                secretSet: false,
                 course: `কার ড্রাইভিং (${quota} ক্লাস)`,
                 totalQuota: quota,
                 completedCount: 0,
@@ -3475,7 +3734,6 @@
                 document.getElementById('vClassProgressText').innerText = `${completed} / ${quota} ক্লাস (বাকি: ${quota - completed}টি)`;
                 document.getElementById('vProgressBar').style.width = `${percent}%`;
 
-                // Show quota complete warning
                 if (completed >= quota) {
                     warningBox.classList.remove('hidden');
                     if (submitBtn) {
@@ -3497,15 +3755,18 @@
             document.getElementById('loginRoleType').value = role;
             const title = document.getElementById('loginModalTitle');
             const help = document.getElementById('loginHelpText');
+            const forgetSection = document.getElementById('forgetPasswordSection');
             document.getElementById('loginUsername').value = '';
             document.getElementById('loginPassword').value = '';
 
             if (role === 'admin') {
                 title.innerHTML = `<i class="fa-solid fa-user-shield text-amber-400"></i> প্রশাসনিক লগইন`;
                 help.innerHTML = `<i class="fa-solid fa-shield-halved text-amber-400 mr-1"></i> কর্তৃপক্ষের প্রদত্ত ক্রেডেনশিয়াল দিয়ে প্রবেশ করুন।`;
+                forgetSection.classList.add('hidden');
             } else {
                 title.innerHTML = `<i class="fa-solid fa-user-graduate text-indigo-400"></i> শিক্ষার্থী লগইন`;
                 help.innerHTML = `<i class="fa-solid fa-circle-info text-indigo-400 mr-1"></i> আপনার নিবন্ধিত ইউজারনেম ও পাসওয়ার্ড দিয়ে প্রবেশ করুন।`;
+                forgetSection.classList.remove('hidden');
             }
             document.getElementById('loginModal').classList.remove('hidden');
         }
@@ -3533,11 +3794,19 @@
             } else {
                 const student = students.find(s => s.username === username && s.password === password);
                 if (student) {
-                    currentUser = { role: 'student', studentId: student.id };
-                    sessionStorage.setItem('mx_session', JSON.stringify(currentUser));
-                    closeLoginModal();
-                    showToast("লগইন সফল", `স্বাগতম ${student.name}!`, "success");
-                    applyLoginStateUI();
+                    // Check if secret word is set
+                    if (!student.secretSet || !student.secretWord) {
+                        // First time login - need to set secret word
+                        closeLoginModal();
+                        openSecretSetupModal(student.id);
+                    } else {
+                        // Normal login
+                        currentUser = { role: 'student', studentId: student.id };
+                        sessionStorage.setItem('mx_session', JSON.stringify(currentUser));
+                        closeLoginModal();
+                        showToast("লগইন সফল", `স্বাগতম ${student.name}!`, "success");
+                        applyLoginStateUI();
+                    }
                 } else {
                     showToast("লগইন ব্যর্থ", "ভুল ইউজারনেম অথবা পাসওয়ার্ড।", "error");
                 }
@@ -3549,6 +3818,80 @@
             sessionStorage.removeItem('mx_session');
             showHomeLanding();
             showToast("লগআউট সম্পন্ন", "সেশন সফলভাবে বন্ধ হয়েছে।", "info");
+        }
+
+        // ========== FORGET PASSWORD (with username + secret) ==========
+        function openForgetPasswordModal() {
+            document.getElementById('forgetUsername').value = '';
+            document.getElementById('forgetSecret').value = '';
+            document.getElementById('forgetPasswordModal').classList.remove('hidden');
+        }
+
+        function closeForgetPasswordModal() {
+            document.getElementById('forgetPasswordModal').classList.add('hidden');
+        }
+
+        async function handleForgetPasswordSubmit(e) {
+            e.preventDefault();
+            const username = document.getElementById('forgetUsername').value.trim();
+            const secret = document.getElementById('forgetSecret').value.trim();
+
+            if (!username) {
+                showToast("ত্রুটি", "ইউজারনেম দিন।", "error");
+                return;
+            }
+
+            if (!secret) {
+                showToast("ত্রুটি", "Secret Word / Number দিন।", "error");
+                return;
+            }
+
+            const student = students.find(s => s.username === username);
+            if (!student) {
+                showToast("ইউজারনেম পাওয়া যায়নি", "এই ইউজারনেমে কোনো শিক্ষার্থী নিবন্ধিত নেই।", "error");
+                return;
+            }
+
+            // Verify secret word
+            if (!student.secretWord || student.secretWord !== secret) {
+                showToast("ভুল Secret Word", "আপনার দেওয়া Secret Word সঠিক নয়। অনুগ্রহ করে সঠিকটি দিন।", "error");
+                return;
+            }
+
+            const existingRequest = notifications.find(n => 
+                n.type === 'password_reset' && 
+                n.studentId === student.id && 
+                n.status === 'pending'
+            );
+
+            if (existingRequest) {
+                showToast("রিকোয়েস্ট ইতোমধ্যে পাঠানো", "আপনার রিকোয়েস্ট ইতোমধ্যে অ্যাডমিনের কাছে পাঠানো হয়েছে। অনুগ্রহ করে অপেক্ষা করুন।", "info");
+                closeForgetPasswordModal();
+                closeLoginModal();
+                return;
+            }
+
+            const notif = {
+                type: 'password_reset',
+                studentId: student.id,
+                studentName: student.name,
+                studentUsername: student.username,
+                status: 'pending',
+                createdAt: new Date().toISOString(),
+                adminMessage: `${student.name} (${student.id}, ইউজারনেম: ${student.username}) সঠিক Secret Word যাচাই করে পাসওয়ার্ড রিসেটের রিকোয়েস্ট পাঠিয়েছেন। "পাসওয়ার্ড সেট করুন" বাটনে ক্লিক করে নতুন পাসওয়ার্ড সেট করুন।`,
+                studentMessage: `পাসওয়ার্ড রিসেটের রিকোয়েস্ট পাঠানো হয়েছে। অ্যাডমিন পাসওয়ার্ড পরিবর্তন করলে অফিস থেকে জানতে পারবেন।`
+            };
+
+            try {
+                await saveNotificationToFirebase(notif);
+                showToast("রিকোয়েস্ট পাঠানো হয়েছে", "অ্যাডমিন আপনার পাসওয়ার্ড রিসেট করলে অফিস থেকে জানতে পারবেন।", "success");
+            } catch(err) {
+                showToast("ত্রুটি", "রিকোয়েস্ট পাঠানো যায়নি: " + err.message, "error");
+                return;
+            }
+
+            closeForgetPasswordModal();
+            closeLoginModal();
         }
 
         // ========== CREDENTIALS ==========
@@ -3781,7 +4124,6 @@
             const student = students.find(s => s.id === studentId);
             if (!student) return;
 
-            // ⭐ Check quota limit
             const completed = student.completedCount || 0;
             const quota = student.totalQuota || DEFAULT_TOTAL_QUOTA;
             if (completed >= quota) {
@@ -3876,7 +4218,6 @@
                 return;
             }
 
-            // Check payment notification trigger
             await checkPaymentNotification(updatedStudent);
 
             clearSignature();
@@ -4003,7 +4344,10 @@
                 const isRead = n.status === 'read';
                 
                 const div = document.createElement('div');
-                div.className = `p-3 rounded-xl border text-xs ${isPending ? 'bg-indigo-500/10 border-indigo-500/30' : 'bg-slate-900 border-slate-800'}`;
+                const bgColor = isPending 
+                    ? (n.type === 'password_reset' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-indigo-500/10 border-indigo-500/30')
+                    : 'bg-slate-900 border-slate-800';
+                div.className = `p-3 rounded-xl border text-xs ${bgColor}`;
 
                 let actionHtml = '';
                 let displayMessage = '';
@@ -4011,7 +4355,21 @@
                 if (isAdmin) {
                     displayMessage = n.adminMessage || n.message || '';
                     
-                    if (n.type === 'payment_due' && n.status === 'pending') {
+                    if (n.type === 'password_reset' && n.status === 'pending') {
+                        actionHtml = `
+                            <div class="mt-2 flex gap-2 flex-wrap">
+                                <button onclick="openResetPasswordModalFromNotification('${n._fbKey}', '${n.studentId}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[10px]">
+                                    <i class="fa-solid fa-key mr-1"></i> পাসওয়ার্ড সেট করুন
+                                </button>
+                                <button onclick="dismissNotification('${n._fbKey}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-lg text-[10px]">
+                                    বাতিল
+                                </button>
+                                <button onclick="deleteNotification('${n._fbKey}')" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold rounded-lg text-[10px] border border-rose-500/40">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> ডিলিট
+                                </button>
+                            </div>
+                        `;
+                    } else if (n.type === 'payment_due' && n.status === 'pending') {
                         actionHtml = `
                             <div class="mt-2 flex gap-2 flex-wrap">
                                 <button onclick="confirmPaymentNotify('${n._fbKey}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[10px]">
@@ -4040,25 +4398,51 @@
                 } else {
                     displayMessage = n.studentMessage || 'অফিস থেকে আপনাকে একটি নোটিফিকেশন পাঠানো হয়েছে।';
                     
-                    actionHtml = `
-                        <div class="mt-2 flex items-center gap-2 flex-wrap">
-                            <div class="text-[10px] text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/30 flex-1">
-                                <i class="fa-solid fa-circle-info mr-1"></i> অফিস থেকে আপনাকে বাকি পেমেন্টের জন্য নোটিফাই করা হয়েছে। অনুগ্রহ করে অফিসে যোগাযোগ করুন।
+                    if (n.type === 'payment_due' && n.status === 'sent') {
+                        actionHtml = `
+                            <div class="mt-2 flex items-center gap-2 flex-wrap">
+                                <div class="text-[10px] text-amber-300 bg-amber-500/10 p-2 rounded-lg border border-amber-500/30 flex-1">
+                                    <i class="fa-solid fa-circle-info mr-1"></i> অফিস থেকে আপনাকে বাকি পেমেন্টের জন্য নোটিফাই করা হয়েছে। অনুগ্রহ করে অফিসে যোগাযোগ করুন।
+                                </div>
                             </div>
-                        </div>
-                    `;
+                        `;
+                    } else if (n.type === 'password_reset' && n.status === 'sent') {
+                        actionHtml = `
+                            <div class="mt-2 flex items-center gap-2 flex-wrap">
+                                <div class="text-[10px] text-emerald-300 bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/30 flex-1">
+                                    <i class="fa-solid fa-check-circle mr-1"></i> অ্যাডমিন আপনার পাসওয়ার্ড রিসেট করেছেন। অফিস থেকে নতুন পাসওয়ার্ড নিন।
+                                </div>
+                            </div>
+                        `;
+                    }
                 }
 
                 const dateStr = n.createdAt ? new Date(n.createdAt).toLocaleString('bn-BD') : '';
 
+                let typeLabel = 'নোটিফিকেশন';
+                let typeIcon = 'fa-bell';
+                let iconColor = 'bg-slate-800 text-slate-500';
+                
+                if (n.type === 'payment_due') {
+                    typeLabel = 'পেমেন্ট নোটিফিকেশন';
+                    typeIcon = 'fa-money-bill-wave';
+                } else if (n.type === 'password_reset') {
+                    typeLabel = 'পাসওয়ার্ড রিসেট রিকোয়েস্ট';
+                    typeIcon = 'fa-key';
+                }
+                
+                if (isPending) {
+                    iconColor = n.type === 'password_reset' ? 'bg-amber-500/20 text-amber-400' : 'bg-indigo-500/20 text-indigo-400';
+                }
+
                 div.innerHTML = `
                     <div class="flex items-start gap-2">
-                        <div class="w-8 h-8 rounded-lg ${isPending ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-800 text-slate-500'} flex items-center justify-center flex-shrink-0">
-                            <i class="fa-solid ${n.type === 'payment_due' ? 'fa-money-bill-wave' : 'fa-bell'}"></i>
+                        <div class="w-8 h-8 rounded-lg ${iconColor} flex items-center justify-center flex-shrink-0">
+                            <i class="fa-solid ${typeIcon}"></i>
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2">
-                                <strong class="text-white text-xs">${n.type === 'payment_due' ? 'পেমেন্ট নোটিফিকেশন' : 'নোটিফিকেশন'}</strong>
+                                <strong class="text-white text-xs">${typeLabel}</strong>
                                 ${isPending ? '<span class="w-2 h-2 rounded-full bg-rose-400"></span>' : ''}
                             </div>
                             <p class="text-[11px] text-slate-300 mt-1">${displayMessage}</p>
