@@ -255,6 +255,12 @@
             background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.1));
             border: 1px solid rgba(251, 191, 36, 0.4);
         }
+
+        /* Self Registration Specific */
+        .register-highlight {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.05));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 font-sans min-h-full flex flex-col antialiased selection:bg-amber-500 selection:text-slate-950">
@@ -1445,7 +1451,7 @@
         </div>
     </div>
 
-    <!-- MODAL: UNIVERSAL LOGIN MODAL -->
+    <!-- MODAL: UNIVERSAL LOGIN MODAL (with self-registration) -->
     <div id="loginModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center hidden p-4 no-print">
         <div class="bg-slate-850 rounded-2xl max-w-md w-full p-6 border border-slate-700 shadow-2xl space-y-5">
             <div class="flex justify-between items-center border-b border-slate-700 pb-3">
@@ -1467,9 +1473,14 @@
                 </div>
                 
                 <div id="forgetPasswordSection" class="hidden">
-                    <button type="button" onclick="openForgetPasswordModal()" class="text-xs text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1">
-                        <i class="fa-solid fa-question-circle"></i> পাসওয়ার্ড ভুলে গেছেন?
-                    </button>
+                    <div class="flex items-center justify-between">
+                        <button type="button" onclick="openForgetPasswordModal()" class="text-xs text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1">
+                            <i class="fa-solid fa-question-circle"></i> পাসওয়ার্ড ভুলে গেছেন?
+                        </button>
+                        <button type="button" onclick="openSelfRegistrationModal()" class="text-xs text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 font-semibold">
+                            <i class="fa-solid fa-user-plus"></i> নতুন নিবন্ধন
+                        </button>
+                    </div>
                 </div>
 
                 <div id="loginHelpText" class="p-3 bg-slate-900 rounded-xl border border-slate-800 text-[11px] text-slate-400">
@@ -1478,6 +1489,76 @@
                 <div class="pt-2 flex space-x-2">
                     <button type="button" onclick="closeLoginModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
                     <button type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold text-xs shadow-md transition">প্রবেশ করুন</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: SELF REGISTRATION (NEW) -->
+    <div id="selfRegistrationModal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-[60] flex items-center justify-center hidden p-4 no-print overflow-y-auto">
+        <div class="bg-slate-850 rounded-2xl max-w-lg w-full p-6 border border-emerald-500/40 shadow-2xl space-y-4 my-auto max-h-[95vh] overflow-y-auto custom-scrollbar">
+            <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+                <h3 class="font-bold text-base text-white flex items-center gap-2">
+                    <i class="fa-solid fa-user-plus text-emerald-400"></i> শিক্ষার্থী স্ব-নিবন্ধন
+                </h3>
+                <button onclick="closeSelfRegistrationModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs text-emerald-200">
+                <p class="font-bold mb-1"><i class="fa-solid fa-circle-info mr-1"></i> নিবন্ধনের নির্দেশনা:</p>
+                <p class="text-[11px] text-emerald-300">নিচের তথ্য পূরণ করে সাবমিট করলে আপনার রিকোয়েস্ট অ্যাডমিনের কাছে যাবে। অ্যাডমিন অনুমোদন করলে আপনি লগইন করতে পারবেন।</p>
+            </div>
+
+            <form onsubmit="handleSelfRegistrationSubmit(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">পূর্ণ নাম *</label>
+                    <input type="text" id="regName" required placeholder="আপনার পূর্ণ নাম" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">মোবাইল নম্বর *</label>
+                        <input type="tel" id="regMobile" required placeholder="01XXXXXXXXX" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">ইমেইল (ঐচ্ছিক)</label>
+                        <input type="email" id="regEmail" placeholder="example@mail.com" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">ইউজারনেম *</label>
+                        <input type="text" id="regUsername" required placeholder="ইউজারনেম" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">পাসওয়ার্ড *</label>
+                        <input type="password" id="regPassword" required placeholder="পাসওয়ার্ড" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-400 mb-1">পাসওয়ার্ড নিশ্চিত করুন *</label>
+                    <input type="password" id="regConfirmPassword" required placeholder="পুনরায় পাসওয়ার্ড দিন" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Secret Word / Number *</label>
+                        <input type="password" id="regSecret" required placeholder="গোপন শব্দ/নাম্বার" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-400 mb-1">Secret Word নিশ্চিত করুন *</label>
+                        <input type="password" id="regConfirmSecret" required placeholder="পুনরায় গোপন শব্দ" class="w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-900 text-xs text-slate-100 font-mono focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                <p class="text-[10px] text-emerald-400"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Secret Word সংরক্ষণ করুন। পাসওয়ার্ড ভুলে গেলে এটি দিয়ে রিসেট করবেন।</p>
+
+                <div class="pt-2 flex space-x-2">
+                    <button type="button" onclick="closeSelfRegistrationModal()" class="flex-1 py-2.5 rounded-xl bg-slate-800 text-slate-300 font-semibold text-xs">বাতিল</button>
+                    <button type="submit" class="flex-1 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold text-xs shadow-md">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> রিকোয়েস্ট পাঠান
+                    </button>
                 </div>
             </form>
         </div>
@@ -3820,6 +3901,106 @@
             showToast("লগআউট সম্পন্ন", "সেশন সফলভাবে বন্ধ হয়েছে।", "info");
         }
 
+        // ========== SELF REGISTRATION ==========
+        function openSelfRegistrationModal() {
+            closeLoginModal();
+            document.getElementById('regName').value = '';
+            document.getElementById('regMobile').value = '';
+            document.getElementById('regEmail').value = '';
+            document.getElementById('regUsername').value = '';
+            document.getElementById('regPassword').value = '';
+            document.getElementById('regConfirmPassword').value = '';
+            document.getElementById('regSecret').value = '';
+            document.getElementById('regConfirmSecret').value = '';
+            document.getElementById('selfRegistrationModal').classList.remove('hidden');
+        }
+
+        function closeSelfRegistrationModal() {
+            document.getElementById('selfRegistrationModal').classList.add('hidden');
+        }
+
+        async function handleSelfRegistrationSubmit(e) {
+            e.preventDefault();
+
+            const name = document.getElementById('regName').value.trim();
+            const mobile = document.getElementById('regMobile').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value.trim();
+            const confirmPassword = document.getElementById('regConfirmPassword').value.trim();
+            const secret = document.getElementById('regSecret').value.trim();
+            const confirmSecret = document.getElementById('regConfirmSecret').value.trim();
+
+            // Validation
+            if (!name || !mobile || !username || !password || !secret) {
+                showToast("ত্রুটি", "সব প্রয়োজনীয় তথ্য পূরণ করুন।", "error");
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showToast("ত্রুটি", "পাসওয়ার্ড দুটি মিলছে না।", "error");
+                return;
+            }
+
+            if (password.length < 4) {
+                showToast("ত্রুটি", "পাসওয়ার্ড অন্তত ৪ অক্ষরের হতে হবে।", "warning");
+                return;
+            }
+
+            if (secret !== confirmSecret) {
+                showToast("ত্রুটি", "Secret Word দুটি মিলছে না।", "error");
+                return;
+            }
+
+            if (secret.length < 3) {
+                showToast("ত্রুটি", "Secret Word অন্তত ৩ অক্ষরের হতে হবে।", "warning");
+                return;
+            }
+
+            // Check if username already exists in students
+            if (students.some(s => s.username === username)) {
+                showToast("ত্রুটি", "এই ইউজারনেম ইতোমধ্যে ব্যবহৃত হয়েছে। অন্যটি চেষ্টা করুন।", "error");
+                return;
+            }
+
+            // Check if pending request with same username exists
+            const existingReq = notifications.find(n => 
+                n.type === 'self_registration' && 
+                n.status === 'pending' &&
+                n.username === username
+            );
+            if (existingReq) {
+                showToast("ইতোমধ্যে রিকোয়েস্ট আছে", "এই ইউজারনেমে ইতোমধ্যে একটি রিকোয়েস্ট পাঠানো হয়েছে। অনুমোদনের জন্য অপেক্ষা করুন।", "warning");
+                return;
+            }
+
+            const notif = {
+                type: 'self_registration',
+                status: 'pending',
+                name: name,
+                mobile: mobile,
+                email: email,
+                username: username,
+                // পাসওয়ার্ড সংরক্ষণ করা হচ্ছে না অ্যাডমিন প্যানেলে দেখানোর জন্য, শুধু সিস্টেমে রাখা হচ্ছে যাতে স্টুডেন্ট লগইন করতে পারে
+                // এখানে password ফিল্ডটি সংরক্ষণ করা হচ্ছে, কিন্তু admin panel-এ খালি দেখাবে
+                password: password,
+                secretWord: secret,
+                createdAt: new Date().toISOString(),
+                adminMessage: `${name} (${mobile}) স্ব-নিবন্ধন করেছেন। ইউজারনেম: ${username}। অনুমোদন করে শিক্ষার্থী অ্যাকাউন্ট তৈরি করুন।`,
+                studentMessage: `আপনার নিবন্ধন রিকোয়েস্ট গ্রহণ করা হয়েছে। অ্যাডমিন অনুমোদন করলে আপনি লগইন করতে পারবেন।`
+            };
+
+            try {
+                await saveNotificationToFirebase(notif);
+                showToast("রিকোয়েস্ট পাঠানো হয়েছে", "আপনার নিবন্ধন রিকোয়েস্ট অ্যাডমিনের কাছে পাঠানো হয়েছে। অনুমোদনের জন্য অপেক্ষা করুন।", "success");
+            } catch(err) {
+                showToast("ত্রুটি", "রিকোয়েস্ট পাঠানো যায়নি: " + err.message, "error");
+                return;
+            }
+
+            closeSelfRegistrationModal();
+        }
+
         // ========== FORGET PASSWORD (with username + secret) ==========
         function openForgetPasswordModal() {
             document.getElementById('forgetUsername').value = '';
@@ -4345,7 +4526,9 @@
                 
                 const div = document.createElement('div');
                 const bgColor = isPending 
-                    ? (n.type === 'password_reset' ? 'bg-amber-500/10 border-amber-500/30' : 'bg-indigo-500/10 border-indigo-500/30')
+                    ? (n.type === 'password_reset' ? 'bg-amber-500/10 border-amber-500/30' : 
+                       n.type === 'self_registration' ? 'bg-emerald-500/10 border-emerald-500/30' : 
+                       'bg-indigo-500/10 border-indigo-500/30')
                     : 'bg-slate-900 border-slate-800';
                 div.className = `p-3 rounded-xl border text-xs ${bgColor}`;
 
@@ -4360,6 +4543,20 @@
                             <div class="mt-2 flex gap-2 flex-wrap">
                                 <button onclick="openResetPasswordModalFromNotification('${n._fbKey}', '${n.studentId}')" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold rounded-lg text-[10px]">
                                     <i class="fa-solid fa-key mr-1"></i> পাসওয়ার্ড সেট করুন
+                                </button>
+                                <button onclick="dismissNotification('${n._fbKey}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-lg text-[10px]">
+                                    বাতিল
+                                </button>
+                                <button onclick="deleteNotification('${n._fbKey}')" class="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white font-bold rounded-lg text-[10px] border border-rose-500/40">
+                                    <i class="fa-solid fa-trash-can mr-1"></i> ডিলিট
+                                </button>
+                            </div>
+                        `;
+                    } else if (n.type === 'self_registration' && n.status === 'pending') {
+                        actionHtml = `
+                            <div class="mt-2 flex gap-2 flex-wrap">
+                                <button onclick="openAddStudentFromNotification('${n._fbKey}')" class="px-3 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-lg text-[10px]">
+                                    <i class="fa-solid fa-user-plus mr-1"></i> শিক্ষার্থী যোগ করুন
                                 </button>
                                 <button onclick="dismissNotification('${n._fbKey}')" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-200 font-bold rounded-lg text-[10px]">
                                     বাতিল
@@ -4429,10 +4626,15 @@
                 } else if (n.type === 'password_reset') {
                     typeLabel = 'পাসওয়ার্ড রিসেট রিকোয়েস্ট';
                     typeIcon = 'fa-key';
+                } else if (n.type === 'self_registration') {
+                    typeLabel = 'নতুন শিক্ষার্থী নিবন্ধন';
+                    typeIcon = 'fa-user-plus';
                 }
                 
                 if (isPending) {
-                    iconColor = n.type === 'password_reset' ? 'bg-amber-500/20 text-amber-400' : 'bg-indigo-500/20 text-indigo-400';
+                    iconColor = n.type === 'password_reset' ? 'bg-amber-500/20 text-amber-400' : 
+                                n.type === 'self_registration' ? 'bg-emerald-500/20 text-emerald-400' : 
+                                'bg-indigo-500/20 text-indigo-400';
                 }
 
                 div.innerHTML = `
@@ -4454,6 +4656,156 @@
                 list.appendChild(div);
             });
         }
+
+        // ========== OPEN ADD STUDENT FROM NOTIFICATION ==========
+        function openAddStudentFromNotification(notifKey) {
+            const n = notifications.find(x => x._fbKey === notifKey);
+            if (!n) return;
+
+            closeNotificationPanel();
+            openAddStudentModal();
+
+            // Pre-fill data from the registration request
+            document.getElementById('newStudentName').value = n.name || '';
+            document.getElementById('newStudentPhone').value = n.mobile || '';
+            document.getElementById('newStudentUsername').value = n.username || '';
+            
+            // Password field should be locked and left empty for admin
+            // The student has already set the password, so admin doesn't need to see it
+            const passField = document.getElementById('newStudentPassword');
+            passField.value = ''; // Don't show the password to admin
+            passField.readOnly = true;
+            passField.placeholder = 'শিক্ষার্থী দিয়েছে';
+            passField.classList.add('bg-slate-800', 'cursor-not-allowed');
+            passField.title = 'শিক্ষার্থী নিজেই পাসওয়ার্ড দিয়েছে, এটি পরিবর্তন করা যাবে না';
+            
+            // Add a small note
+            let note = document.getElementById('passwordLockNote');
+            if (!note) {
+                note = document.createElement('p');
+                note.id = 'passwordLockNote';
+                note.className = 'text-[10px] text-amber-400 mt-1';
+                note.innerHTML = '<i class="fa-solid fa-lock mr-1"></i> ';
+                passField.parentNode.appendChild(note);
+            }
+
+            // Store notif key so we can delete it on student creation
+            document.getElementById('addStudentModal').dataset.notifKey = notifKey;
+
+            showToast("রিকোয়েস্ট লোড হয়েছে", "নিচের তথ্যগুলো স্বয়ংক্রিয়ভাবে পূরণ করা হয়েছে। শুধু আইডি, ফি ও অন্যান্য প্রয়োজনীয় তথ্য দিন।", "info");
+        }
+
+        // Override handleAddStudentSubmit to handle notification-based creation
+        const originalHandleAddStudentSubmit = handleAddStudentSubmit;
+        handleAddStudentSubmit = async function(e) {
+            e.preventDefault();
+            
+            // Get the notification key if this was from a self-registration
+            const notifKey = document.getElementById('addStudentModal').dataset.notifKey;
+            const notification = notifKey ? notifications.find(x => x._fbKey === notifKey) : null;
+            
+            // Call original function logic but with password from notification if available
+            const name = document.getElementById('newStudentName').value.trim();
+            const id = document.getElementById('newStudentId').value.trim();
+            const phone = document.getElementById('newStudentPhone').value.trim();
+            const quota = parseInt(document.getElementById('newStudentQuota').value) || 28;
+            const fee = parseFloat(document.getElementById('newStudentFee').value) || 0;
+            const initialDeposit = parseFloat(document.getElementById('newStudentDeposit').value) || 0;
+            const username = document.getElementById('newStudentUsername').value.trim();
+            
+            // Get password from notification (if exists) or from field
+            let password;
+            if (notification && notification.password) {
+                password = notification.password; // Use password from self-registration
+            } else {
+                password = document.getElementById('newStudentPassword').value.trim();
+            }
+
+            if (!id) {
+                showToast("ত্রুটি", "শিক্ষার্থী আইডি দিন।", "error");
+                return;
+            }
+
+            if (students.some(s => s.id === id)) {
+                showToast("ত্রুটি", "এই শিক্ষার্থী আইডি ইতোমধ্যে নিবন্ধিত!", "error");
+                return;
+            }
+
+            const deposits = [];
+            if (initialDeposit > 0) {
+                deposits.push({
+                    amount: initialDeposit,
+                    date: new Date().toISOString().slice(0, 10),
+                    note: "Initial Deposit"
+                });
+            }
+
+            let photoUrl = "";
+            if (tempNewStudentPhoto) {
+                try {
+                    photoUrl = await uploadToCloudinaryWithStudentFolder(tempNewStudentPhoto, `${id}_photo.jpg`, 'image', id);
+                } catch(err) {
+                    console.warn('Photo upload failed, using base64:', err);
+                    photoUrl = tempNewStudentPhoto;
+                }
+            }
+
+            const attachments = [];
+            for (let i = 0; i < tempAttachments.length; i++) {
+                const att = tempAttachments[i];
+                try {
+                    const url = await uploadToCloudinaryWithStudentFolder(att.dataUrl, att.name, getCloudinaryResourceType(att.type, att.name), id);
+                    attachments.push({
+                        name: att.name,
+                        size: att.size,
+                        type: att.type,
+                        url: url,
+                        dataUrl: url,
+                        uploadedAt: att.uploadedAt
+                    });
+                } catch(err) {
+                    console.warn('Attachment upload failed:', err);
+                    attachments.push(att);
+                }
+            }
+
+            const newStudent = {
+                id, name, phone, username, password,
+                secretWord: notification ? notification.secretWord : "",
+                secretSet: notification ? true : false,
+                course: `কার ড্রাইভিং (${quota} ক্লাস)`,
+                totalQuota: quota,
+                completedCount: 0,
+                lastClassDate: "-",
+                admissionFee: fee,
+                deposits: deposits,
+                photoUrl: photoUrl,
+                attachments: attachments,
+                createdAt: new Date().toISOString()
+            };
+
+            try {
+                await saveStudentToFirebase(newStudent);
+                
+                // If this was from a notification, delete the notification
+                if (notifKey) {
+                    await deleteNotificationFromFirebase(notifKey);
+                }
+                
+                showToast("শিক্ষার্থী নিবন্ধিত", `${name} সফলভাবে নিবন্ধিত হয়েছেন।`, "success");
+            } catch(err) {
+                showToast("ত্রুটি", "Firebase save ব্যর্থ: " + err.message, "error");
+                return;
+            }
+
+            tempAttachments = [];
+            pendingAttachmentStudentId = null;
+            savedAttachmentsSnapshot = [];
+            tempNewStudentPhoto = "";
+            delete document.getElementById('addStudentModal').dataset.notifKey;
+
+            closeAddStudentModal();
+        };
 
         async function confirmPaymentNotify(notifKey) {
             const n = notifications.find(x => x._fbKey === notifKey);
